@@ -24,18 +24,11 @@ const Navbar: React.FC = () => {
   };
 
   return (
-    <header 
-      className={styles.navbar}
-      style={{
-        backgroundColor: colors.secondaryBg,
-        borderBottom: `1px solid ${colors.primaryBorder}`,
-      }}
-    >
+    <header className={styles.navbar}>
       <nav className={styles.inner}>
         <div 
           className={styles.brand} 
           onClick={() => handleNavClick('/dashboard')}
-          style={{ color: colors.primaryText }}
         >
           <img src="/LogoTransparent.png" alt="TaskAura Logo" className={styles.logo} />
           <span className={styles.brandText}>TaskAura</span>
@@ -59,10 +52,7 @@ const Navbar: React.FC = () => {
               className={({ isActive }) =>
                 isActive ? `${styles.link} ${styles.active}` : styles.link
               }
-              style={({ isActive }) => ({
-                color: isActive ? colors.accentText : colors.secondaryText,
-                backgroundColor: isActive ? `${colors.accentText}10` : 'transparent',
-              })}
+
               onClick={() => handleNavClick(link.path)}
             >
               {link.name}

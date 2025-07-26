@@ -233,10 +233,6 @@ const Dashboard: React.FC = () => {
       exit={{ opacity: 0 }}
       transition={{ duration: 0.5 }}
       className={styles.dashboardContainer}
-      style={{
-        backgroundColor: colors.primaryBg,
-        color: colors.primaryText,
-      }}
     >
       {/* Confetti Animation */}
       <AnimatePresence>
@@ -678,19 +674,31 @@ const Dashboard: React.FC = () => {
             <CheckCircleIcon className={styles.cardIcon} />
             <span className={styles.cardTitle}>Weekly Goals</span>
           </div>
-          <div className={styles.chartWrapper}>
-            <ChartCard title="" data={weeklyChartData} type="doughnut" />
-          </div>
-          <div className={styles.cardStats}>
-            <div className={styles.cardStat}>
-              <span className={styles.statValue}>{weeklyDone}</span>
-              <span className={styles.statDesc}>completed</span>
+          {weeklyTotal > 0 ? (
+            <>
+              <div className={styles.chartWrapper}>
+                <ChartCard title="" data={weeklyChartData} type="doughnut" />
+              </div>
+              <div className={styles.cardStats}>
+                <div className={styles.cardStat}>
+                  <span className={styles.statValue}>{weeklyDone}</span>
+                  <span className={styles.statDesc}>completed</span>
+                </div>
+                <div className={styles.cardStat}>
+                  <span className={styles.statValue}>{weeklyTotal - weeklyDone}</span>
+                  <span className={styles.statDesc}>remaining</span>
+                </div>
+              </div>
+            </>
+          ) : (
+            <div className={styles.noActivityMessage}>
+              <div className={styles.noActivityIcon}>📋</div>
+              <h3 className={styles.noActivityTitle}>No Activity Detected</h3>
+              <p className={styles.noActivityText}>
+                Start setting weekly goals to track your progress and stay motivated!
+              </p>
             </div>
-            <div className={styles.cardStat}>
-              <span className={styles.statValue}>{weeklyTotal - weeklyDone}</span>
-              <span className={styles.statDesc}>remaining</span>
-            </div>
-          </div>
+          )}
           <button 
             className={styles.cardButton} 
             onClick={() => navigate('/weekly')}

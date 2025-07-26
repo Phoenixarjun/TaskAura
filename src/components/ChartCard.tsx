@@ -65,13 +65,7 @@ const ChartCard: React.FC<ChartCardProps> = ({ title, data, type }) => {
   return (
     <div className={styles.chartContainer}>
       {title && (
-        <h2 style={{
-          fontSize: '1.125rem',
-          fontWeight: '600',
-          marginBottom: '0.5rem',
-          color: isDark ? '#e2e8f0' : '#1e293b',
-          transition: 'color 0.3s ease'
-        }}>{title}</h2>
+        <h2 className={styles.chartTitle}>{title}</h2>
       )}
       <div className={styles.chartWrapper}>
         {type === 'bar' ? (

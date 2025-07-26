@@ -46,13 +46,14 @@ body.dark .dashboard-quote {
 }
 
 body.dark .dashboardContainer {
-  background: linear-gradient(135deg, #1e293b 60%, #6366f1 100%);
-  color: #e2e8f0;
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%) !important;
+  color: #e2e8f0 !important;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3) !important;
 }
 
 body.dark .dashboardContainer::before {
-  background: linear-gradient(135deg, #10b981 0%, #6366f1 100%);
-  opacity: 0.1;
+  background: linear-gradient(135deg, #10b981 0%, #6366f1 100%) !important;
+  opacity: 0.05 !important;
 }
 
 .confetti {
@@ -156,14 +157,15 @@ body.dark .dateDisplay {
 }
 
 .timeIcon, .dateIcon {
-  width: 1.2rem;
-  height: 1.2rem;
-  color: #64748b;
+  width: 1rem;
+  height: 1rem;
+  color: #6366f1;
+  transition: all 0.3s ease;
 }
 
 body.dark .timeIcon,
 body.dark .dateIcon {
-  color: #94a3b8;
+  color: #10b981;
 }
 
 .time, .date {
@@ -242,12 +244,22 @@ body.dark .statCard:hover {
 }
 
 .statIcon {
+  width: 1.25rem;
+  height: 1.25rem;
   color: #6366f1;
   transition: all 0.3s ease;
 }
 
 .statCard:hover .statIcon {
   color: #764ba2;
+}
+
+body.dark .statIcon {
+  color: #10b981;
+}
+
+body.dark .statCard:hover .statIcon {
+  color: #6366f1;
 }
 
 .statContent {
@@ -462,6 +474,9 @@ body.dark .streakLabel {
   color: #1e293b;
   margin: 0;
   transition: color 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
 }
 
 body.dark .learningsTitle {
@@ -469,9 +484,14 @@ body.dark .learningsTitle {
 }
 
 .learningsIcon {
-  width: 1.5rem;
-  height: 1.5rem;
+  width: 1.25rem;
+  height: 1.25rem;
   color: #6366f1;
+  transition: all 0.3s ease;
+}
+
+body.dark .learningsIcon {
+  color: #10b981;
 }
 
 .viewMoreBtn {
@@ -631,6 +651,7 @@ body.dark .emptyText {
   z-index: 1;
 }
 
+/* Improved spacing for Weekly Goals card */
 .mainCard {
   background: rgba(255, 255, 255, 0.8);
   backdrop-filter: blur(20px);
@@ -641,8 +662,10 @@ body.dark .emptyText {
   transition: all 0.3s ease;
   position: relative;
   z-index: 1;
+  overflow: visible;
   display: flex;
   flex-direction: column;
+  gap: 1.5rem;
 }
 
 .mainCard::before {
@@ -676,13 +699,18 @@ body.dark .mainCard:hover {
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  margin-bottom: 1.5rem;
+  margin-bottom: 0;
 }
 
 .cardIcon {
-  width: 1.5rem;
-  height: 1.5rem;
+  width: 1.25rem;
+  height: 1.25rem;
   color: #6366f1;
+  transition: all 0.3s ease;
+}
+
+body.dark .cardIcon {
+  color: #10b981;
 }
 
 .cardTitle {
@@ -699,13 +727,15 @@ body.dark .cardTitle {
 
 .cardStats {
   display: flex;
-  justify-content: space-between;
-  margin-bottom: 1.5rem;
-  transition: all 0.3s ease;
+  justify-content: space-around;
+  gap: 1rem;
+  margin: 0;
+  padding: 1rem 0;
+  border-top: 1px solid rgba(100, 116, 139, 0.1);
 }
 
 body.dark .cardStats {
-  color: #e2e8f0;
+  border-top-color: rgba(148, 163, 184, 0.1);
 }
 
 .cardStat {
@@ -736,21 +766,47 @@ body.dark .statDesc {
 }
 
 .cardButton {
-  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+  margin-top: auto;
+  padding: 0.75rem 1.5rem;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
   border: none;
-  padding: 0.75rem 1.5rem;
-  border-radius: 0.5rem;
-  font-size: 0.875rem;
+  border-radius: 0.75rem;
   font-weight: 600;
+  font-size: 0.9rem;
   cursor: pointer;
   transition: all 0.3s ease;
-  width: 100%;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 2.5rem;
+  position: relative;
+  overflow: hidden;
+}
+
+body.dark .cardButton {
+  background: linear-gradient(135deg, #10b981 0%, #6366f1 100%);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
 }
 
 .cardButton:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+}
+
+body.dark .cardButton:hover {
+  box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+}
+
+.cardButton:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+}
+
+body.dark .cardButton:active {
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
 }
 
 .dailyProgress {
@@ -1000,9 +1056,14 @@ body.dark .trendsTitle {
 }
 
 .trendsIcon {
-  width: 1.5rem;
-  height: 1.5rem;
+  width: 1.25rem;
+  height: 1.25rem;
   color: #6366f1;
+  transition: all 0.3s ease;
+}
+
+body.dark .trendsIcon {
+  color: #10b981;
 }
 
 .trendsChart {
@@ -1071,9 +1132,14 @@ body.dark .achievementsTitle {
 }
 
 .achievementsIcon {
-  width: 1.5rem;
-  height: 1.5rem;
+  width: 1.25rem;
+  height: 1.25rem;
   color: #6366f1;
+  transition: all 0.3s ease;
+}
+
+body.dark .achievementsIcon {
+  color: #10b981;
 }
 
 .achievementsGrid {
@@ -1214,6 +1280,49 @@ body.dark .actionsTitle {
   height: 1.25rem;
 }
 
+/* No Activity Message */
+.noActivityMessage {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 1rem;
+  text-align: center;
+  gap: 1rem;
+  min-height: 200px;
+}
+
+.noActivityIcon {
+  font-size: 3rem;
+  opacity: 0.6;
+  margin-bottom: 0.5rem;
+}
+
+.noActivityTitle {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #64748b;
+  margin: 0;
+  transition: color 0.3s ease;
+}
+
+body.dark .noActivityTitle {
+  color: #94a3b8;
+}
+
+.noActivityText {
+  font-size: 0.9rem;
+  color: #94a3b8;
+  margin: 0;
+  line-height: 1.5;
+  max-width: 250px;
+  transition: color 0.3s ease;
+}
+
+body.dark .noActivityText {
+  color: #64748b;
+}
+
 @media (max-width: 768px) {
   .dashboardContainer {
     padding: 1rem;
@@ -1255,4 +1364,16 @@ body.dark .actionsTitle {
   .actionsGrid {
     grid-template-columns: 1fr;
   }
+} 
+
+.chartTitle {
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: #1e293b;
+  transition: color 0.3s ease;
+}
+
+body.dark .chartTitle {
+  color: #e2e8f0;
 } 
