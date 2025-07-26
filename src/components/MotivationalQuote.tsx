@@ -22,12 +22,11 @@ const MotivationalQuote: React.FC = () => {
   const { colors } = useTheme();
 
   return (
-    <div style={{
+    <div className="dashboard-quote" style={{
       marginBottom: '1rem',
       textAlign: 'center',
       fontSize: '1.125rem',
       fontStyle: 'italic',
-      color: colors.primaryText,
       transition: 'color 0.3s ease',
       lineHeight: '1.6'
     }}>

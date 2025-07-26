@@ -2,6 +2,7 @@ import React from 'react';
 import { Bar, Doughnut } from 'react-chartjs-2';
 import { Chart as ChartJS, ArcElement, BarElement, CategoryScale, LinearScale, Tooltip, Legend } from 'chart.js';
 import { useTheme } from '../contexts/ThemeContext';
+import styles from '../pages/Dashboard.module.css';
 
 ChartJS.register(ArcElement, BarElement, CategoryScale, LinearScale, Tooltip, Legend);
 
@@ -12,7 +13,7 @@ interface ChartCardProps {
 }
 
 const ChartCard: React.FC<ChartCardProps> = ({ title, data, type }) => {
-  const { colors, isDark } = useTheme();
+  const { isDark } = useTheme();
   
   const chartOptions = {
     responsive: true, 
@@ -62,33 +63,17 @@ const ChartCard: React.FC<ChartCardProps> = ({ title, data, type }) => {
   };
   
   return (
-    <div style={{
-      backgroundColor: colors.cardBg,
-      borderRadius: '0.5rem',
-      boxShadow: `0 4px 16px rgba(0, 0, 0, ${isDark ? '0.2' : '0.1'})`,
-      padding: '1rem',
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-      transition: 'all 0.3s ease',
-      border: `1px solid ${colors.primaryBorder}`
-    }}>
+    <div className={styles.chartContainer}>
       {title && (
         <h2 style={{
           fontSize: '1.125rem',
           fontWeight: '600',
           marginBottom: '0.5rem',
-          color: colors.primaryText,
+          color: isDark ? '#e2e8f0' : '#1e293b',
           transition: 'color 0.3s ease'
         }}>{title}</h2>
       )}
-      <div style={{
-        width: '100%',
-        height: '12rem',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center'
-      }}>
+      <div className={styles.chartWrapper}>
         {type === 'bar' ? (
           <Bar 
             data={data} 
