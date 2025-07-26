@@ -14,6 +14,53 @@ interface ChartCardProps {
 const ChartCard: React.FC<ChartCardProps> = ({ title, data, type }) => {
   const { colors, isDark } = useTheme();
   
+  const chartOptions = {
+    responsive: true, 
+    maintainAspectRatio: false,
+    plugins: { 
+      legend: { 
+        display: false,
+        labels: {
+          color: isDark ? '#e2e8f0' : '#1e293b'
+        }
+      },
+      tooltip: {
+        backgroundColor: isDark ? 'rgba(30, 41, 59, 0.95)' : 'rgba(0, 0, 0, 0.8)',
+        titleColor: isDark ? '#e2e8f0' : '#fff',
+        bodyColor: isDark ? '#e2e8f0' : '#fff',
+        borderColor: isDark ? 'rgba(99, 102, 241, 0.5)' : '#6366f1',
+        borderWidth: 1,
+        cornerRadius: 8,
+        displayColors: false
+      }
+    },
+    scales: type === 'bar' ? {
+      y: {
+        beginAtZero: true,
+        ticks: {
+          color: isDark ? '#94a3b8' : '#64748b',
+          font: {
+            size: 12
+          }
+        },
+        grid: {
+          color: isDark ? 'rgba(148, 163, 184, 0.1)' : 'rgba(100, 116, 139, 0.1)'
+        }
+      },
+      x: {
+        ticks: {
+          color: isDark ? '#94a3b8' : '#64748b',
+          font: {
+            size: 12
+          }
+        },
+        grid: {
+          color: isDark ? 'rgba(148, 163, 184, 0.1)' : 'rgba(100, 116, 139, 0.1)'
+        }
+      }
+    } : undefined
+  };
+  
   return (
     <div style={{
       backgroundColor: colors.cardBg,
@@ -45,67 +92,12 @@ const ChartCard: React.FC<ChartCardProps> = ({ title, data, type }) => {
         {type === 'bar' ? (
           <Bar 
             data={data} 
-            options={{ 
-              responsive: true, 
-              maintainAspectRatio: false,
-              plugins: { 
-                legend: { 
-                  display: false,
-                  labels: {
-                    color: colors.primaryText
-                  }
-                },
-                tooltip: {
-                  backgroundColor: colors.modalBg,
-                  titleColor: colors.primaryText,
-                  bodyColor: colors.primaryText,
-                  borderColor: colors.accentBorder,
-                  borderWidth: 1
-                }
-              },
-              scales: {
-                y: {
-                  beginAtZero: true,
-                  ticks: {
-                    color: colors.secondaryText
-                  },
-                  grid: {
-                    color: colors.primaryBorder
-                  }
-                },
-                x: {
-                  ticks: {
-                    color: colors.secondaryText
-                  },
-                  grid: {
-                    color: colors.primaryBorder
-                  }
-                }
-              }
-            }} 
+            options={chartOptions} 
           />
         ) : (
           <Doughnut 
             data={data} 
-            options={{ 
-              responsive: true, 
-              maintainAspectRatio: false,
-              plugins: { 
-                legend: { 
-                  display: false,
-                  labels: {
-                    color: colors.primaryText
-                  }
-                },
-                tooltip: {
-                  backgroundColor: colors.modalBg,
-                  titleColor: colors.primaryText,
-                  bodyColor: colors.primaryText,
-                  borderColor: colors.accentBorder,
-                  borderWidth: 1
-                }
-              }
-            }} 
+            options={chartOptions} 
           />
         )}
       </div>

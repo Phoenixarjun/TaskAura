@@ -42,7 +42,7 @@ const cardVariants = {
 
 const Dashboard: React.FC = () => {
   const navigate = useNavigate();
-  const { colors } = useTheme();
+  const { colors, isDark } = useTheme();
   const [currentTime, setCurrentTime] = useState(new Date());
   const [greeting, setGreeting] = useState('');
   const [showConfetti, setShowConfetti] = useState(false);
@@ -102,14 +102,14 @@ const Dashboard: React.FC = () => {
       datasets: [{
         label: 'Weekly Tasks Completed',
         data: weekData,
-        backgroundColor: 'rgba(99, 102, 241, 0.8)',
-        borderColor: 'rgba(99, 102, 241, 1)',
+        backgroundColor: isDark ? 'rgba(99, 102, 241, 0.6)' : 'rgba(99, 102, 241, 0.8)',
+        borderColor: isDark ? 'rgba(99, 102, 241, 0.9)' : 'rgba(99, 102, 241, 1)',
         borderWidth: 2,
         borderRadius: 4,
         borderSkipped: false,
       }]
     };
-  }, []);
+  }, [isDark]);
 
   // Daily Task Completion Chart Data
   const dailyCompletionData = useMemo(() => {
@@ -119,14 +119,19 @@ const Dashboard: React.FC = () => {
       datasets: [{
         label: 'Daily Tasks Completed',
         data: last7Days.map(p => p.completed),
-        backgroundColor: 'rgba(16, 185, 129, 0.8)',
-        borderColor: 'rgba(16, 185, 129, 1)',
+        backgroundColor: isDark ? 'rgba(16, 185, 129, 0.6)' : 'rgba(16, 185, 129, 0.8)',
+        borderColor: isDark ? 'rgba(16, 185, 129, 0.9)' : 'rgba(16, 185, 129, 1)',
         borderWidth: 2,
         tension: 0.4,
         fill: false,
+        pointBackgroundColor: isDark ? 'rgba(16, 185, 129, 0.9)' : 'rgba(16, 185, 129, 1)',
+        pointBorderColor: isDark ? '#0f172a' : '#ffffff',
+        pointBorderWidth: 2,
+        pointRadius: 4,
+        pointHoverRadius: 6,
       }]
     };
-  }, []);
+  }, [isDark]);
 
   // Learning Rate Chart Data
   const learningRateData = useMemo(() => {
@@ -141,25 +146,33 @@ const Dashboard: React.FC = () => {
       datasets: [{
         label: 'Total Learnings',
         data: rateData,
-        backgroundColor: 'rgba(168, 85, 247, 0.1)',
-        borderColor: 'rgba(168, 85, 247, 1)',
+        backgroundColor: isDark ? 'rgba(168, 85, 247, 0.2)' : 'rgba(168, 85, 247, 0.1)',
+        borderColor: isDark ? 'rgba(168, 85, 247, 0.9)' : 'rgba(168, 85, 247, 1)',
         borderWidth: 3,
         tension: 0.4,
         fill: true,
+        pointBackgroundColor: isDark ? 'rgba(168, 85, 247, 0.9)' : 'rgba(168, 85, 247, 1)',
+        pointBorderColor: isDark ? '#0f172a' : '#ffffff',
+        pointBorderWidth: 2,
+        pointRadius: 4,
+        pointHoverRadius: 6,
       }]
     };
-  }, []);
+  }, [isDark]);
 
   // Learning Streak Chart Data
   const learningStreakData = useMemo(() => ({
     labels: ['Current', 'Goal'],
     datasets: [{
       data: [streak, 30],
-      backgroundColor: ['rgba(239, 68, 68, 0.8)', 'rgba(156, 163, 175, 0.3)'],
+      backgroundColor: [
+        isDark ? 'rgba(239, 68, 68, 0.7)' : 'rgba(239, 68, 68, 0.8)',
+        isDark ? 'rgba(156, 163, 175, 0.2)' : 'rgba(156, 163, 175, 0.3)'
+      ],
       borderWidth: 0,
       cutout: '70%',
     }]
-  }), [streak]);
+  }), [streak, isDark]);
 
   // Chart data
   const weeklyChartData = useMemo(() => ({
@@ -167,11 +180,14 @@ const Dashboard: React.FC = () => {
     datasets: [
       {
         data: [weeklyDone, weeklyTotal - weeklyDone],
-        backgroundColor: ['#6366f1', '#d1d5db'],
+        backgroundColor: [
+          isDark ? 'rgba(99, 102, 241, 0.8)' : '#6366f1',
+          isDark ? 'rgba(156, 163, 175, 0.3)' : '#d1d5db'
+        ],
         borderWidth: 0,
       },
     ],
-  }), [weeklyDone, weeklyTotal]);
+  }), [weeklyDone, weeklyTotal, isDark]);
 
   // Achievement system
   const achievements = useMemo(() => {
@@ -381,18 +397,38 @@ const Dashboard: React.FC = () => {
                 plugins: { 
                   legend: { display: false },
                   tooltip: {
-                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                    titleColor: '#fff',
-                    bodyColor: '#fff',
-                    borderColor: '#6366f1',
-                    borderWidth: 1
+                    backgroundColor: isDark ? 'rgba(30, 41, 59, 0.95)' : 'rgba(0, 0, 0, 0.8)',
+                    titleColor: isDark ? '#e2e8f0' : '#fff',
+                    bodyColor: isDark ? '#e2e8f0' : '#fff',
+                    borderColor: isDark ? 'rgba(99, 102, 241, 0.5)' : '#6366f1',
+                    borderWidth: 1,
+                    cornerRadius: 8,
+                    displayColors: false
                   }
                 },
                 scales: {
                   y: {
                     beginAtZero: true,
                     ticks: {
-                      stepSize: 1
+                      stepSize: 1,
+                      color: isDark ? '#94a3b8' : '#64748b',
+                      font: {
+                        size: 12
+                      }
+                    },
+                    grid: {
+                      color: isDark ? 'rgba(148, 163, 184, 0.1)' : 'rgba(100, 116, 139, 0.1)'
+                    }
+                  },
+                  x: {
+                    ticks: {
+                      color: isDark ? '#94a3b8' : '#64748b',
+                      font: {
+                        size: 12
+                      }
+                    },
+                    grid: {
+                      color: isDark ? 'rgba(148, 163, 184, 0.1)' : 'rgba(100, 116, 139, 0.1)'
                     }
                   }
                 }
@@ -422,18 +458,38 @@ const Dashboard: React.FC = () => {
                 plugins: { 
                   legend: { display: false },
                   tooltip: {
-                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                    titleColor: '#fff',
-                    bodyColor: '#fff',
-                    borderColor: '#10b981',
-                    borderWidth: 1
+                    backgroundColor: isDark ? 'rgba(30, 41, 59, 0.95)' : 'rgba(0, 0, 0, 0.8)',
+                    titleColor: isDark ? '#e2e8f0' : '#fff',
+                    bodyColor: isDark ? '#e2e8f0' : '#fff',
+                    borderColor: isDark ? 'rgba(16, 185, 129, 0.5)' : '#10b981',
+                    borderWidth: 1,
+                    cornerRadius: 8,
+                    displayColors: false
                   }
                 },
                 scales: {
                   y: {
                     beginAtZero: true,
                     ticks: {
-                      stepSize: 1
+                      stepSize: 1,
+                      color: isDark ? '#94a3b8' : '#64748b',
+                      font: {
+                        size: 12
+                      }
+                    },
+                    grid: {
+                      color: isDark ? 'rgba(148, 163, 184, 0.1)' : 'rgba(100, 116, 139, 0.1)'
+                    }
+                  },
+                  x: {
+                    ticks: {
+                      color: isDark ? '#94a3b8' : '#64748b',
+                      font: {
+                        size: 12
+                      }
+                    },
+                    grid: {
+                      color: isDark ? 'rgba(148, 163, 184, 0.1)' : 'rgba(100, 116, 139, 0.1)'
                     }
                   }
                 }
@@ -463,18 +519,38 @@ const Dashboard: React.FC = () => {
                 plugins: { 
                   legend: { display: false },
                   tooltip: {
-                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                    titleColor: '#fff',
-                    bodyColor: '#fff',
-                    borderColor: '#a855f7',
-                    borderWidth: 1
+                    backgroundColor: isDark ? 'rgba(30, 41, 59, 0.95)' : 'rgba(0, 0, 0, 0.8)',
+                    titleColor: isDark ? '#e2e8f0' : '#fff',
+                    bodyColor: isDark ? '#e2e8f0' : '#fff',
+                    borderColor: isDark ? 'rgba(168, 85, 247, 0.5)' : '#a855f7',
+                    borderWidth: 1,
+                    cornerRadius: 8,
+                    displayColors: false
                   }
                 },
                 scales: {
                   y: {
                     beginAtZero: true,
                     ticks: {
-                      stepSize: 1
+                      stepSize: 1,
+                      color: isDark ? '#94a3b8' : '#64748b',
+                      font: {
+                        size: 12
+                      }
+                    },
+                    grid: {
+                      color: isDark ? 'rgba(148, 163, 184, 0.1)' : 'rgba(100, 116, 139, 0.1)'
+                    }
+                  },
+                  x: {
+                    ticks: {
+                      color: isDark ? '#94a3b8' : '#64748b',
+                      font: {
+                        size: 12
+                      }
+                    },
+                    grid: {
+                      color: isDark ? 'rgba(148, 163, 184, 0.1)' : 'rgba(100, 116, 139, 0.1)'
                     }
                   }
                 }
@@ -504,11 +580,13 @@ const Dashboard: React.FC = () => {
                 plugins: { 
                   legend: { display: false },
                   tooltip: {
-                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                    titleColor: '#fff',
-                    bodyColor: '#fff',
-                    borderColor: '#ef4444',
-                    borderWidth: 1
+                    backgroundColor: isDark ? 'rgba(30, 41, 59, 0.95)' : 'rgba(0, 0, 0, 0.8)',
+                    titleColor: isDark ? '#e2e8f0' : '#fff',
+                    bodyColor: isDark ? '#e2e8f0' : '#fff',
+                    borderColor: isDark ? 'rgba(239, 68, 68, 0.5)' : '#ef4444',
+                    borderWidth: 1,
+                    cornerRadius: 8,
+                    displayColors: false
                   }
                 }
               }} 
@@ -746,11 +824,13 @@ const Dashboard: React.FC = () => {
               plugins: { 
                 legend: { display: false },
                 tooltip: {
-                  backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                  titleColor: '#fff',
-                  bodyColor: '#fff',
-                  borderColor: '#6366f1',
-                  borderWidth: 1
+                  backgroundColor: isDark ? 'rgba(30, 41, 59, 0.95)' : 'rgba(0, 0, 0, 0.8)',
+                  titleColor: isDark ? '#e2e8f0' : '#fff',
+                  bodyColor: isDark ? '#e2e8f0' : '#fff',
+                  borderColor: isDark ? 'rgba(99, 102, 241, 0.5)' : '#6366f1',
+                  borderWidth: 1,
+                  cornerRadius: 8,
+                  displayColors: false
                 }
               },
               scales: {
@@ -760,7 +840,25 @@ const Dashboard: React.FC = () => {
                   ticks: {
                     callback: function(value) {
                       return value + '%';
+                    },
+                    color: isDark ? '#94a3b8' : '#64748b',
+                    font: {
+                      size: 12
                     }
+                  },
+                  grid: {
+                    color: isDark ? 'rgba(148, 163, 184, 0.1)' : 'rgba(100, 116, 139, 0.1)'
+                  }
+                },
+                x: {
+                  ticks: {
+                    color: isDark ? '#94a3b8' : '#64748b',
+                    font: {
+                      size: 12
+                    }
+                  },
+                  grid: {
+                    color: isDark ? 'rgba(148, 163, 184, 0.1)' : 'rgba(100, 116, 139, 0.1)'
                   }
                 }
               }
