@@ -1,30 +1,33 @@
 /* Dashboard.module.css */
 
+/* --- Dashboard Container: Fresh Implementation --- */
 .dashboardContainer {
   max-width: 1400px;
   margin: 0 auto;
   padding: 2rem 1.5rem;
   min-height: 100vh;
-  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
-  transition: all 0.3s ease;
-  color: var(--primary-text, #1e293b);
-  position: relative;
+  background: #ffffff; /* Light mode: pure white background */
+  color: #1e293b;
   border-radius: 2rem;
-  margin: 1rem;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+  position: relative;
+  transition: background 0.3s, color 0.3s;
+  z-index: 1;
 }
 
-.dashboardContainer::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 200px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  opacity: 0.05;
-  z-index: 0;
+/* --- Dark Mode: Dark Background --- */
+body.dark .dashboardContainer {
+  background: #1e293b; /* Dark mode: dark background */
+  color: #e2e8f0;
+  border-radius: 2rem;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(99, 102, 241, 0.2);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  transition: background 0.3s, color 0.3s;
 }
+
+
 
 .dashboard-quote {
   color: #334155;
@@ -43,17 +46,6 @@ body.dark .dashboard-quote {
   color: #10b981;
   background: rgba(16, 185, 129, 0.13);
   box-shadow: 0 2px 8px rgba(16, 185, 129, 0.07);
-}
-
-body.dark .dashboardContainer {
-  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%) !important;
-  color: #e2e8f0 !important;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3) !important;
-}
-
-body.dark .dashboardContainer::before {
-  background: linear-gradient(135deg, #10b981 0%, #6366f1 100%) !important;
-  opacity: 0.05 !important;
 }
 
 .confetti {
@@ -1324,9 +1316,6 @@ body.dark .noActivityText {
 }
 
 @media (max-width: 768px) {
-  .dashboardContainer {
-    padding: 1rem;
-  }
   
   .heroContent {
     grid-template-columns: 1fr;
