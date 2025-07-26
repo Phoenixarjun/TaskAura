@@ -5,6 +5,9 @@
   margin: 0 auto;
   padding: 0 1rem;
   width: 100%;
+  background: var(--primary-bg, #f8fafc);
+  color: var(--primary-text, #1e293b);
+  transition: background 0.3s ease, color 0.3s ease;
 }
 
 .weekly-header {
@@ -19,7 +22,7 @@
 .weekly-title {
   font-size: 2.5rem;
   font-weight: 700;
-  color: #1e293b;
+  color: var(--primary-text, #1e293b);
   margin: 0;
   transition: color 0.3s ease;
 }
@@ -30,7 +33,7 @@ body.dark .weekly-title {
 
 .weekly-date-range {
   font-size: 1.1rem;
-  color: #64748b;
+  color: var(--secondary-text, #64748b);
   font-weight: 500;
   transition: color 0.3s ease;
 }
@@ -82,7 +85,7 @@ body.dark .weekly-date-range {
   align-items: center;
   gap: 0.5rem;
   padding: 1rem 2rem;
-  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  background: var(--secondary-gradient, linear-gradient(135deg, #6366f1, #8b5cf6));
   color: white;
   border: none;
   border-radius: 1.5rem;
@@ -330,22 +333,11 @@ body.dark .task-delete-btn:hover {
 }
 
 .weekly-modal {
-  background: rgba(255, 255, 255, 0.95);
-  border-radius: 1.5rem;
-  padding: 2.5rem;
-  width: 100%;
-  max-width: 500px;
-  border: 1px solid rgba(99, 102, 241, 0.1);
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
-  transition: all 0.3s ease;
-  position: relative;
-  overflow: hidden;
+  /* Use the unified modal-container class */
+  composes: modal-container;
 }
 
-body.dark .weekly-modal {
-  background: rgba(30, 41, 59, 0.95);
-  border-color: rgba(99, 102, 241, 0.2);
-}
+/* Remove duplicate modal styling since it's now handled globally */
 
 .modal-header-bar {
   position: absolute;

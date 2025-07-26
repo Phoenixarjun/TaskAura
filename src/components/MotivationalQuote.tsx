@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTheme } from '../contexts/ThemeContext';
 
 const quotes = [
   "Success is not the key to happiness. Happiness is the key to success.",
@@ -18,7 +19,7 @@ const MotivationalQuote: React.FC = () => {
     return quotes[Math.floor(Math.random() * quotes.length)];
   }, []);
 
-  const isDark = document.documentElement.classList.contains('dark');
+  const { colors } = useTheme();
 
   return (
     <div style={{
@@ -26,7 +27,7 @@ const MotivationalQuote: React.FC = () => {
       textAlign: 'center',
       fontSize: '1.125rem',
       fontStyle: 'italic',
-      color: isDark ? '#e2e8f0' : '#1e293b',
+      color: colors.primaryText,
       transition: 'color 0.3s ease',
       lineHeight: '1.6'
     }}>

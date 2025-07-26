@@ -2,8 +2,9 @@ import React, { useEffect, useState, useMemo } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { motion, AnimatePresence } from 'framer-motion';
 import { loadFromStorage, saveToStorage, updateStreak } from '../utils/storage';
-import { PencilIcon, TrashIcon, FireIcon } from '@heroicons/react/24/solid';
+import { PencilIcon, TrashIcon, FireIcon, PlusIcon, ChartBarIcon } from '@heroicons/react/24/solid';
 import './Learn.css';
+import BookOpenIcon from '@heroicons/react/24/solid/BookOpenIcon';
 
 const CATEGORIES = [
   { label: 'Tech', color: 'bg-blue-500' },
@@ -45,6 +46,15 @@ const cardVariants = {
   exit: { opacity: 0, scale: 0.9 },
 };
 
+const QUOTES = [
+  'Learning never exhausts the mind. – Leonardo da Vinci',
+  'The beautiful thing about learning is nobody can take it away from you. – B.B. King',
+  'Live as if you were to die tomorrow. Learn as if you were to live forever. – Mahatma Gandhi',
+  'The more that you read, the more things you will know. – Dr. Seuss',
+  'Education is the most powerful weapon which you can use to change the world. – Nelson Mandela',
+];
+const randomQuote = QUOTES[Math.floor(Math.random() * QUOTES.length)];
+
 const Learn: React.FC = () => {
   const [learnings, setLearnings] = useState<LearningEntry[]>(() => loadFromStorage('learnHistory'));
   const [form, setForm] = useState({ title: '', description: '', category: 'Tech', source: '' });
@@ -57,8 +67,9 @@ const Learn: React.FC = () => {
 
   const today = getTodayISO();
   const streak = useMemo(() => updateStreak(learnings), [learnings]);
-  const hasToday = learnings.some((l) => l.date === today);
-  const todayEntry = learnings.find((l) => l.date === today);
+  const learningRate = learnings.length;
+  const todayLearnings = learnings.filter(l => l.date === today);
+  const pastLearnings = learnings.filter(l => l.date !== today);
 
   // Milestone confetti
   useEffect(() => {
@@ -106,12 +117,6 @@ const Learn: React.FC = () => {
     }
 
     if (modalMode === 'add') {
-      // Check if already has today's entry
-      if (hasToday) {
-        setFormError('You already logged a learning for today!');
-        return;
-      }
-
       const newEntry: LearningEntry = {
         id: uuidv4(),
         title: form.title.trim(),
@@ -183,78 +188,116 @@ const Learn: React.FC = () => {
         )}
       </AnimatePresence>
 
-      {/* Streak Header */}
-      <motion.div
-        animate={{ scale: [1, 1.15, 1] }}
-        transition={{ repeat: Infinity, duration: 1.5, ease: 'easeInOut' }}
-        className="streak-header"
+      {/* Stats Header */}
+      <div
+        className="streak-header redesigned-streak-header"
       >
-        <div className="streak-flame">
-          <FireIcon className="flame-icon" />
-          <span className="streak-count">{streak}</span>
-          <span className="streak-label">Day Streak</span>
+        <div className="streak-header-svg">
+          <BookOpenIcon className="streak-svg-icon" />
         </div>
-        <div className="streak-subtext">Keep learning every day to grow your streak.</div>
-      </motion.div>
+        <div className="streak-header-content">
+          <div className="streak-flame">
+            <FireIcon className="flame-icon" />
+            <span className="streak-count">{streak}</span>
+            <span className="streak-label">Day Streak</span>
+          </div>
+          <div className="learning-rate">
+            <ChartBarIcon className="rate-icon" />
+            <span className="rate-count">{learningRate}</span>
+            <span className="rate-label">Learning Rate</span>
+          </div>
+          <div className="streak-subtext">Keep learning every day to grow your streak and rate.</div>
+          <div className="streak-quote">The more that you read, the more things you will know. – Dr. Seuss</div>
+        </div>
+      </div>
 
-      {/* Daily Learn Form or Preview */}
+      {/* Today's Learning Stack */}
       <motion.div
         initial={{ opacity: 0, y: 24 }}
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: 24 }}
         className="learn-form-section"
       >
-        {hasToday && todayEntry ? (
-          <div className="learn-form-preview">
-            <div className="learn-form-preview-header">
-              <span className={`category-badge ${todayEntry.category.toLowerCase()}`}>{todayEntry.category}</span>
-              <span className="preview-title">{todayEntry.title}</span>
-            </div>
-            {todayEntry.description && <div className="preview-description">{todayEntry.description}</div>}
-            {todayEntry.source && (
-              <a href={todayEntry.source} target="_blank" rel="noopener noreferrer" className="preview-source">Source</a>
-            )}
-            <div className="preview-date">{formatDate(todayEntry.date)}</div>
-            <div className="preview-actions">
-              <button
-                className="edit-btn"
-                onClick={() => openEditModal(todayEntry)}
-                aria-label="Edit today's learning"
-              >
-                <PencilIcon className="action-icon" /> Edit
-              </button>
-              <button
-                className="delete-btn"
-                onClick={() => handleDelete(todayEntry.id)}
-                aria-label="Delete today's learning"
-              >
-                <TrashIcon className="action-icon" /> Delete
-              </button>
-            </div>
-          </div>
-        ) : (
-          <div className="learn-form">
-            <div className="form-title">What did you learn today?</div>
+        <div className="today-learnings">
+          <div className="today-header">
+            <h3 className="today-title">Today's Learnings</h3>
             <button
-              className="submit-btn"
+              className="add-learning-btn"
               onClick={openAddModal}
-              style={{ marginTop: '1rem', width: '100%' }}
+              aria-label="Add new learning"
             >
-              Add Today's Learning
+              <PlusIcon className="add-icon" />
+              Add Learning
             </button>
           </div>
-        )}
+          
+          {todayLearnings.length === 0 ? (
+            <div className="today-empty">
+              <span className="today-empty-icon">📚</span>
+              <div className="today-empty-message">No learnings yet today. Start your journey!</div>
+            </div>
+          ) : (
+            <div className="today-stack">
+              <AnimatePresence>
+                {todayLearnings.map((entry, idx) => (
+                  <motion.div
+                    key={entry.id}
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: 20 }}
+                    transition={{ delay: idx * 0.1 }}
+                    className="today-learning-card"
+                  >
+                    <div className="learning-card-header">
+                      <span className={`category-badge ${entry.category.toLowerCase()}`}>
+                        {entry.category}
+                      </span>
+                      <span className="learning-card-title">{entry.title}</span>
+                    </div>
+                    {entry.description && (
+                      <div className="learning-card-desc">{entry.description}</div>
+                    )}
+                    {entry.source && (
+                      <a 
+                        href={entry.source} 
+                        target="_blank" 
+                        rel="noopener noreferrer" 
+                        className="learning-card-source"
+                      >
+                        Source
+                      </a>
+                    )}
+                    <div className="learning-card-actions">
+                      <button
+                        className="edit-btn"
+                        onClick={() => openEditModal(entry)}
+                        aria-label="Edit learning"
+                      >
+                        <PencilIcon className="action-icon" />
+                      </button>
+                      <button
+                        className="delete-btn"
+                        onClick={() => handleDelete(entry.id)}
+                        aria-label="Delete learning"
+                      >
+                        <TrashIcon className="action-icon" />
+                      </button>
+                    </div>
+                  </motion.div>
+                ))}
+              </AnimatePresence>
+            </div>
+          )}
+        </div>
       </motion.div>
 
-      {/* Timeline */}
-      <div className="timeline-section">
-        <h2 className="timeline-title"><FireIcon className="timeline-fire" />Learning Timeline</h2>
-        {learnings.length === 0 ? (
-          <div className="timeline-empty">
-            <span className="timeline-empty-icon">📚</span>
-            <div className="timeline-empty-message">You'll see your journey here soon. Start now!</div>
-          </div>
-        ) : (
+      {/* Past Learnings */}
+      {pastLearnings.length > 0 && (
+        <div className="timeline-section">
+          <h2 className="timeline-title">
+            <FireIcon className="timeline-fire" />
+            Learning History
+          </h2>
           <motion.ul
             initial="hidden"
             animate="visible"
@@ -263,7 +306,7 @@ const Learn: React.FC = () => {
             className="timeline"
           >
             <AnimatePresence>
-              {learnings.map((entry, idx) => (
+              {pastLearnings.map((entry, idx) => (
                 <motion.li
                   key={entry.id}
                   custom={idx}
@@ -274,12 +317,23 @@ const Learn: React.FC = () => {
                   className="timeline-card"
                 >
                   <div className="timeline-card-header">
-                    <span className={`category-badge ${entry.category.toLowerCase()}`}>{entry.category}</span>
+                    <span className={`category-badge ${entry.category.toLowerCase()}`}>
+                      {entry.category}
+                    </span>
                     <span className="timeline-card-title">{entry.title}</span>
                   </div>
-                  {entry.description && <div className="timeline-card-desc">{entry.description}</div>}
+                  {entry.description && (
+                    <div className="timeline-card-desc">{entry.description}</div>
+                  )}
                   {entry.source && (
-                    <a href={entry.source} target="_blank" rel="noopener noreferrer" className="timeline-card-source">Source</a>
+                    <a 
+                      href={entry.source} 
+                      target="_blank" 
+                      rel="noopener noreferrer" 
+                      className="timeline-card-source"
+                    >
+                      Source
+                    </a>
                   )}
                   <div className="timeline-card-date">{formatDate(entry.date)}</div>
                   <div className="timeline-card-actions">
@@ -302,8 +356,8 @@ const Learn: React.FC = () => {
               ))}
             </AnimatePresence>
           </motion.ul>
-        )}
-      </div>
+        </div>
+      )}
 
       {/* Edit/Add Modal */}
       <AnimatePresence>

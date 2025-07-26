@@ -4,13 +4,14 @@
   max-width: 1100px;
   margin: 0 auto;
   padding: 2.5rem 1.5rem 3rem 1.5rem;
-  background: rgba(255,255,255,0.85);
+  background: var(--card-bg, rgba(255,255,255,0.85));
   border-radius: 2rem;
   box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.18);
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--primary-border, #e5e7eb);
   backdrop-filter: blur(8px);
   min-height: 80vh;
   transition: background 0.3s ease, border-color 0.3s ease;
+  color: var(--primary-text, #1e293b);
 }
 
 /* Dark mode container */
@@ -64,7 +65,7 @@ body.dark .daily-header {
 .daily-title {
   font-size: 2.5rem;
   font-weight: 800;
-  color: #1e293b;
+  color: var(--primary-text, #1e293b);
   margin: 0 0 0.5rem 0;
   transition: color 0.3s ease;
 }
@@ -75,7 +76,7 @@ body.dark .daily-title {
 
 .daily-date {
   font-size: 1.1rem;
-  color: #64748b;
+  color: var(--secondary-text, #64748b);
   font-weight: 500;
   transition: color 0.3s ease;
 }
@@ -385,31 +386,16 @@ body.dark .task-description {
 
 /* Modal Styles */
 .daily-modal {
-  position: relative;
-  background: #fff;
-  border-radius: 1.2rem;
-  box-shadow: 0 20px 40px -5px rgba(16,185,129,0.13);
-  width: 100%;
-  max-width: 32rem;
-  border: 1px solid #e5e7eb;
-  padding: 2.5rem 2rem;
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
-  transition: background 0.3s ease, border-color 0.3s ease;
+  /* Use the unified modal-container class */
+  composes: modal-container;
 }
 
-body.dark .daily-modal {
-  background: #1e293b;
-  border-color: #334155;
-  box-shadow: 0 20px 40px -5px rgba(0, 0, 0, 0.3);
-}
+/* Remove duplicate modal styling since it's now handled globally */
 
 .modal-header-bar {
   position: absolute;
   top: -0.7rem;
-  left: 50%;
-  transform: translateX(-50%);
+  transform: translateX(50%);
   width: 7rem;
   height: 0.4rem;
   border-radius: 1rem;
