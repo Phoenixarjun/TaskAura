@@ -1,0 +1,127 @@
+.container {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+  width: 100%;
+}
+
+.header {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  margin-bottom: 2.5rem;
+}
+@media (min-width: 768px) {
+  .header {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+}
+
+.streak {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #f59e42;
+  margin-bottom: 0.5rem;
+}
+
+.formCard {
+  border-radius: 1.5rem;
+  background: linear-gradient(135deg, #ede9fe 60%, #d1fae5 100%);
+  box-shadow: 0 4px 32px 0 rgba(0,0,0,0.07);
+  padding: 2rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  min-width: 260px;
+  max-width: 400px;
+}
+
+.input, .select, .textarea {
+  padding: 0.7rem 1rem;
+  border-radius: 0.7rem;
+  border: 1px solid #c4b5fd;
+  font-size: 1rem;
+  background: #fff;
+  color: #22223b;
+  margin-bottom: 0.5rem;
+}
+.textarea {
+  min-height: 60px;
+  resize: vertical;
+}
+
+.button {
+  width: 100%;
+  padding: 0.75rem 0;
+  border-radius: 1rem;
+  background: #a78bfa;
+  color: #fff;
+  font-weight: 600;
+  font-size: 1rem;
+  border: none;
+  box-shadow: 0 2px 8px 0 rgba(168,85,247,0.08);
+  cursor: pointer;
+  margin-top: 0.5rem;
+  transition: background 0.2s, box-shadow 0.2s;
+}
+.button:hover {
+  background: #7c3aed;
+  box-shadow: 0 4px 16px 0 rgba(168,85,247,0.15);
+}
+
+.timeline {
+  margin-top: 2.5rem;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+}
+
+.timelineCard {
+  border-radius: 1.2rem;
+  background: linear-gradient(135deg, #ede9fe 60%, #d1fae5 100%);
+  box-shadow: 0 2px 16px 0 rgba(0,0,0,0.07);
+  padding: 1.2rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.timelineHeader {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.badge {
+  display: inline-block;
+  padding: 0.15em 0.7em;
+  border-radius: 0.7em;
+  font-size: 0.8em;
+  color: #fff;
+  background: #6366f1;
+  margin-right: 0.5em;
+}
+
+.timelineSource {
+  color: #059669;
+  font-size: 0.9em;
+  text-decoration: underline;
+}
+
+.timelineDate {
+  color: #64748b;
+  font-size: 0.85em;
+}
+
+.timelineDesc {
+  color: #334155;
+  font-size: 0.97em;
+} 

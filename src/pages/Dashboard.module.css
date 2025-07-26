@@ -1,0 +1,839 @@
+/* Dashboard.module.css - Enhanced Dashboard Design */
+
+.dashboardContainer {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1rem;
+  width: 100%;
+}
+
+.confetti {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  pointer-events: none;
+  font-size: 2rem;
+  animation: confetti-fall 3s ease-out;
+}
+
+@keyframes confetti-fall {
+  0% {
+    transform: translateY(-100vh) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(100vh) rotate(720deg);
+    opacity: 0;
+  }
+}
+
+/* Hero Section */
+.heroSection {
+  margin-bottom: 2rem;
+  padding: 2rem;
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%);
+  border-radius: 2rem;
+  border: 1px solid rgba(99, 102, 241, 0.2);
+  backdrop-filter: blur(10px);
+  transition: all 0.3s ease;
+}
+
+body.dark .heroSection {
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.2) 0%, rgba(139, 92, 246, 0.2) 100%);
+  border-color: rgba(99, 102, 241, 0.3);
+}
+
+.heroContent {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+@media (min-width: 768px) {
+  .heroContent {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+}
+
+.greetingSection {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.greeting {
+  font-size: 2.5rem;
+  font-weight: 800;
+  color: #1e293b;
+  margin: 0;
+  transition: color 0.3s ease;
+}
+
+body.dark .greeting {
+  color: #e2e8f0;
+}
+
+.timeDisplay, .dateDisplay {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #64748b;
+  font-size: 1.1rem;
+  transition: color 0.3s ease;
+}
+
+body.dark .timeDisplay,
+body.dark .dateDisplay {
+  color: #94a3b8;
+}
+
+.timeIcon, .dateIcon {
+  width: 1.2rem;
+  height: 1.2rem;
+  color: #6366f1;
+  transition: color 0.3s ease;
+}
+
+body.dark .timeIcon,
+body.dark .dateIcon {
+  color: #818cf8;
+}
+
+.time, .date {
+  font-weight: 600;
+}
+
+.quoteSection {
+  flex: 1;
+  max-width: 400px;
+}
+
+/* Quick Stats */
+.quickStats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.statCard {
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 1.5rem;
+  padding: 1.5rem;
+  border: 1px solid rgba(99, 102, 241, 0.1);
+  box-shadow: 0 4px 20px rgba(99, 102, 241, 0.08);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+body.dark .statCard {
+  background: rgba(30, 41, 59, 0.9);
+  border-color: rgba(99, 102, 241, 0.2);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+}
+
+.statCard::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #6366f1, #8b5cf6, #ec4899);
+  transform: scaleX(0);
+  transition: transform 0.3s ease;
+}
+
+.statCard:hover::before {
+  transform: scaleX(1);
+}
+
+.statIcon {
+  width: 3rem;
+  height: 3rem;
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  border-radius: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  margin-bottom: 1rem;
+  transition: all 0.3s ease;
+}
+
+.statCard:hover .statIcon {
+  transform: scale(1.1) rotate(5deg);
+}
+
+.statContent {
+  margin-bottom: 1rem;
+}
+
+.statNumber {
+  font-size: 2rem;
+  font-weight: 800;
+  color: #1e293b;
+  display: block;
+  transition: color 0.3s ease;
+}
+
+body.dark .statNumber {
+  color: #e2e8f0;
+}
+
+.statLabel {
+  font-size: 0.9rem;
+  color: #64748b;
+  font-weight: 600;
+  transition: color 0.3s ease;
+}
+
+body.dark .statLabel {
+  color: #94a3b8;
+}
+
+.statProgress {
+  width: 100%;
+  height: 6px;
+  background: #e2e8f0;
+  border-radius: 3px;
+  overflow: hidden;
+  transition: background 0.3s ease;
+}
+
+body.dark .statProgress {
+  background: #334155;
+}
+
+.progressBar {
+  height: 100%;
+  background: linear-gradient(90deg, #6366f1, #8b5cf6);
+  border-radius: 3px;
+  transition: width 0.8s ease;
+}
+
+/* Main Grid */
+.mainGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2rem;
+  margin-bottom: 2rem;
+}
+
+@media (min-width: 1024px) {
+  .mainGrid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.mainCard {
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 1.5rem;
+  padding: 2rem;
+  border: 1px solid rgba(99, 102, 241, 0.1);
+  box-shadow: 0 8px 32px rgba(99, 102, 241, 0.08);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+body.dark .mainCard {
+  background: rgba(30, 41, 59, 0.95);
+  border-color: rgba(99, 102, 241, 0.2);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+}
+
+.mainCard::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, transparent 0%, rgba(99, 102, 241, 0.02) 100%);
+  pointer-events: none;
+}
+
+.cardHeader {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  margin-bottom: 1.5rem;
+}
+
+.cardIcon {
+  width: 1.5rem;
+  height: 1.5rem;
+  color: #6366f1;
+  transition: color 0.3s ease;
+}
+
+body.dark .cardIcon {
+  color: #818cf8;
+}
+
+.cardTitle {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #1e293b;
+  transition: color 0.3s ease;
+}
+
+body.dark .cardTitle {
+  color: #e2e8f0;
+}
+
+.chartWrapper {
+  margin-bottom: 1.5rem;
+}
+
+.cardStats {
+  display: flex;
+  justify-content: space-around;
+  margin-bottom: 1.5rem;
+}
+
+.cardStat {
+  text-align: center;
+}
+
+.statValue {
+  display: block;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #6366f1;
+  transition: color 0.3s ease;
+}
+
+body.dark .statValue {
+  color: #818cf8;
+}
+
+.statDesc {
+  font-size: 0.8rem;
+  color: #64748b;
+  transition: color 0.3s ease;
+}
+
+body.dark .statDesc {
+  color: #94a3b8;
+}
+
+.cardButton {
+  width: 100%;
+  padding: 0.8rem 1.5rem;
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  color: white;
+  border: none;
+  border-radius: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 16px rgba(99, 102, 241, 0.2);
+}
+
+.cardButton:hover {
+  background: linear-gradient(135deg, #4f46e5, #7c3aed);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(99, 102, 241, 0.3);
+}
+
+/* Daily Progress Ring */
+.dailyProgress {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 1.5rem;
+}
+
+.progressRing {
+  position: relative;
+  width: 120px;
+  height: 120px;
+}
+
+.progressSvg {
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+}
+
+.progressBg {
+  stroke: #e2e8f0;
+  transition: stroke 0.3s ease;
+}
+
+body.dark .progressBg {
+  stroke: #334155;
+}
+
+.progressFill {
+  stroke: #6366f1;
+  stroke-linecap: round;
+  transition: stroke-dasharray 0.8s ease;
+}
+
+.progressText {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+}
+
+.progressPercent {
+  display: block;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #6366f1;
+  transition: color 0.3s ease;
+}
+
+body.dark .progressPercent {
+  color: #818cf8;
+}
+
+.progressLabel {
+  font-size: 0.8rem;
+  color: #64748b;
+  transition: color 0.3s ease;
+}
+
+body.dark .progressLabel {
+  color: #94a3b8;
+}
+
+/* Task List */
+.taskList {
+  margin-bottom: 1.5rem;
+}
+
+.taskListTitle {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #1e293b;
+  margin-bottom: 0.8rem;
+  transition: color 0.3s ease;
+}
+
+body.dark .taskListTitle {
+  color: #e2e8f0;
+}
+
+.taskItems {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.taskItem {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  color: #64748b;
+  transition: color 0.3s ease;
+}
+
+body.dark .taskItem {
+  color: #94a3b8;
+}
+
+.taskDone {
+  color: #10b981;
+  text-decoration: line-through;
+}
+
+body.dark .taskDone {
+  color: #34d399;
+}
+
+.taskDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #6366f1;
+  transition: background 0.3s ease;
+}
+
+body.dark .taskDot {
+  background: #818cf8;
+}
+
+.taskDone .taskDot {
+  background: #10b981;
+}
+
+body.dark .taskDone .taskDot {
+  background: #34d399;
+}
+
+.taskText {
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Streak Display */
+.streakDisplay {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 1.5rem;
+}
+
+/* Recent Learnings */
+.recentLearnings {
+  margin-bottom: 1.5rem;
+}
+
+.learningTitle {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #1e293b;
+  margin-bottom: 0.8rem;
+  transition: color 0.3s ease;
+}
+
+body.dark .learningTitle {
+  color: #e2e8f0;
+}
+
+.learningItems {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.learningItem {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.learningCategory {
+  font-size: 0.7rem;
+  color: #6366f1;
+  font-weight: 600;
+  text-transform: uppercase;
+  transition: color 0.3s ease;
+}
+
+body.dark .learningCategory {
+  color: #818cf8;
+}
+
+.learningTitle {
+  font-size: 0.9rem;
+  color: #64748b;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: color 0.3s ease;
+}
+
+body.dark .learningTitle {
+  color: #94a3b8;
+}
+
+/* Progress Trends */
+.progressTrends {
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 1.5rem;
+  padding: 2rem;
+  border: 1px solid rgba(99, 102, 241, 0.1);
+  box-shadow: 0 8px 32px rgba(99, 102, 241, 0.08);
+  transition: all 0.3s ease;
+  margin-bottom: 2rem;
+}
+
+body.dark .progressTrends {
+  background: rgba(30, 41, 59, 0.95);
+  border-color: rgba(99, 102, 241, 0.2);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+}
+
+.trendsTitle {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin-bottom: 1.5rem;
+  transition: color 0.3s ease;
+}
+
+body.dark .trendsTitle {
+  color: #e2e8f0;
+}
+
+.trendsIcon {
+  width: 1.5rem;
+  height: 1.5rem;
+  color: #6366f1;
+  transition: color 0.3s ease;
+}
+
+body.dark .trendsIcon {
+  color: #818cf8;
+}
+
+.trendsChart {
+  width: 100%;
+  height: 300px;
+  margin-bottom: 1.5rem;
+}
+
+.trendsStats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 1rem;
+}
+
+.trendStat {
+  text-align: center;
+  padding: 1rem;
+  background: rgba(99, 102, 241, 0.1);
+  border-radius: 1rem;
+  transition: all 0.3s ease;
+}
+
+body.dark .trendStat {
+  background: rgba(99, 102, 241, 0.2);
+}
+
+.trendValue {
+  display: block;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #6366f1;
+  margin-bottom: 0.3rem;
+  transition: color 0.3s ease;
+}
+
+body.dark .trendValue {
+  color: #818cf8;
+}
+
+.trendLabel {
+  font-size: 0.8rem;
+  color: #64748b;
+  transition: color 0.3s ease;
+}
+
+body.dark .trendLabel {
+  color: #94a3b8;
+}
+
+/* Achievements Section */
+.achievementsSection {
+  margin-bottom: 2rem;
+}
+
+.achievementsTitle {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin-bottom: 1.5rem;
+  transition: color 0.3s ease;
+}
+
+body.dark .achievementsTitle {
+  color: #e2e8f0;
+}
+
+.achievementsIcon {
+  width: 1.5rem;
+  height: 1.5rem;
+  color: #f59e0b;
+  transition: color 0.3s ease;
+}
+
+body.dark .achievementsIcon {
+  color: #fbbf24;
+}
+
+.achievementsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1rem;
+}
+
+.achievementCard {
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 1rem;
+  padding: 1.5rem;
+  border: 1px solid rgba(99, 102, 241, 0.1);
+  box-shadow: 0 4px 16px rgba(99, 102, 241, 0.08);
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+body.dark .achievementCard {
+  background: rgba(30, 41, 59, 0.9);
+  border-color: rgba(99, 102, 241, 0.2);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+}
+
+.achievementIcon {
+  font-size: 2rem;
+  width: 3rem;
+  height: 3rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #f59e0b, #f97316);
+  border-radius: 0.8rem;
+  color: white;
+  transition: all 0.3s ease;
+}
+
+body.dark .achievementIcon {
+  background: linear-gradient(135deg, #fbbf24, #fb923c);
+}
+
+.achievementContent {
+  flex: 1;
+}
+
+.achievementTitle {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0 0 0.3rem 0;
+  transition: color 0.3s ease;
+}
+
+body.dark .achievementTitle {
+  color: #e2e8f0;
+}
+
+.achievementDesc {
+  font-size: 0.9rem;
+  color: #64748b;
+  margin: 0;
+  transition: color 0.3s ease;
+}
+
+body.dark .achievementDesc {
+  color: #94a3b8;
+}
+
+/* Quick Actions */
+.quickActions {
+  margin-bottom: 2rem;
+}
+
+.actionsTitle {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin-bottom: 1.5rem;
+  transition: color 0.3s ease;
+}
+
+body.dark .actionsTitle {
+  color: #e2e8f0;
+}
+
+.actionsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+}
+
+.actionButton {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.8rem;
+  padding: 1.5rem;
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(99, 102, 241, 0.1);
+  border-radius: 1.5rem;
+  box-shadow: 0 4px 16px rgba(99, 102, 241, 0.08);
+  transition: all 0.3s ease;
+  cursor: pointer;
+  color: #1e293b;
+  text-decoration: none;
+}
+
+body.dark .actionButton {
+  background: rgba(30, 41, 59, 0.9);
+  border-color: rgba(99, 102, 241, 0.2);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+  color: #e2e8f0;
+}
+
+.actionButton:hover {
+  background: rgba(99, 102, 241, 0.1);
+  border-color: rgba(99, 102, 241, 0.3);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(99, 102, 241, 0.15);
+}
+
+body.dark .actionButton:hover {
+  background: rgba(99, 102, 241, 0.2);
+  border-color: rgba(99, 102, 241, 0.4);
+}
+
+.actionIcon {
+  width: 2rem;
+  height: 2rem;
+  color: #6366f1;
+  transition: color 0.3s ease;
+}
+
+body.dark .actionIcon {
+  color: #818cf8;
+}
+
+.actionButton span {
+  font-weight: 600;
+  font-size: 1rem;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .heroSection {
+    padding: 1.5rem;
+  }
+  
+  .greeting {
+    font-size: 2rem;
+  }
+  
+  .quickStats {
+    grid-template-columns: 1fr;
+  }
+  
+  .mainGrid {
+    grid-template-columns: 1fr;
+  }
+  
+  .trendsStats {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  
+  .achievementsGrid {
+    grid-template-columns: 1fr;
+  }
+  
+  .actionsGrid {
+    grid-template-columns: 1fr;
+  }
+} 

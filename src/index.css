@@ -1,0 +1,165 @@
+/* Global base styles for TaskAura. Use CSS modules for components. */
+
+body {
+  margin: 0;
+  font-family: 'Inter', 'Poppins', Arial, sans-serif;
+  background: #f8fafc;
+  color: #22223b;
+  min-height: 100vh;
+  cursor: default;
+  transition: background 0.3s ease, color 0.3s ease;
+}
+
+/* Dark mode styles */
+body.dark {
+  background: #0f172a;
+  color: #e2e8f0;
+}
+
+#root {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* App Container Styles */
+.app-container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 50%, #cbd5e1 100%);
+  transition: background 0.3s ease;
+}
+
+body.dark .app-container {
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
+}
+
+.main-content {
+  flex: 1;
+  padding: 1.5rem 0.5rem 2rem 0.5rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+  transition: all 0.3s ease;
+}
+
+@media (min-width: 768px) {
+  .main-content {
+    padding: 1.5rem 2rem 2rem 2rem;
+  }
+}
+
+/* Global cursor styles */
+* {
+  cursor: inherit;
+}
+
+button, 
+[role="button"],
+input[type="button"],
+input[type="submit"],
+input[type="reset"],
+a,
+.clickable {
+  cursor: pointer;
+}
+
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="number"],
+input[type="search"],
+input[type="url"],
+input[type="tel"],
+textarea,
+select {
+  cursor: text;
+}
+
+input[type="checkbox"],
+input[type="radio"] {
+  cursor: pointer;
+}
+
+/* Disabled elements */
+button:disabled,
+input:disabled,
+.disabled {
+  cursor: not-allowed;
+}
+
+/* Loading state */
+.loading {
+  cursor: wait;
+}
+
+/* Resize cursors */
+.resizable-h {
+  cursor: ew-resize;
+}
+
+.resizable-v {
+  cursor: ns-resize;
+}
+
+.resizable-diagonal {
+  cursor: nw-resize;
+}
+
+/* StreakDisplay Component Styles */
+.streak-display {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem;
+}
+
+.streak-content {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 700;
+  color: #f59e42;
+  transition: color 0.3s ease;
+}
+
+body.dark .streak-content {
+  color: #fbbf24;
+}
+
+.streak-fire-icon {
+  width: 1.5rem;
+  height: 1.5rem;
+  animation: flame-flicker 2s infinite alternate;
+}
+
+@keyframes flame-flicker {
+  0% {
+    transform: scale(1) rotate(-2deg);
+    opacity: 0.9;
+  }
+  50% {
+    transform: scale(1.05) rotate(1deg);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1) rotate(-1deg);
+    opacity: 0.95;
+  }
+}
+
+.streak-number {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: inherit;
+}
+
+.streak-text {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: inherit;
+  opacity: 0.8;
+}
+
+/* Add any global resets or utility classes here if needed. */
