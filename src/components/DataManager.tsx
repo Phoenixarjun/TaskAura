@@ -3,6 +3,7 @@ import { exportDataToJSON, importDataFromJSON, clearAllData, getAllData } from '
 import { toast } from 'react-hot-toast';
 import { ArrowDownTrayIcon, ArrowUpTrayIcon, TrashIcon, ChevronDownIcon, ChevronUpIcon } from '@heroicons/react/24/solid';
 import './DataManager.css';
+import { API_ENDPOINTS } from '../utils/config';
 
 interface DataManagerProps {
   onDataRefresh?: () => void;
@@ -27,8 +28,8 @@ const DataManager: React.FC<DataManagerProps> = ({ onDataRefresh }) => {
       
       // Fetch from backend APIs
       const [weeklyResponse, learnResponse] = await Promise.allSettled([
-        fetch('http://localhost:4000/api/weekly-tasks'),
-        fetch('http://localhost:4000/api/learn-history')
+        fetch(API_ENDPOINTS.weeklyTasks),
+        fetch(API_ENDPOINTS.learnHistory)
       ]);
 
       const backendData = {

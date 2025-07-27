@@ -7,7 +7,9 @@ import { toast } from 'react-hot-toast';
 import './Learn.css';
 import BookOpenIcon from '@heroicons/react/24/solid/BookOpenIcon';
 
-const API_URL = 'http://localhost:4000/api/learn-history';
+import { API_ENDPOINTS } from '../utils/config';
+
+const API_URL = API_ENDPOINTS.learnHistory;
 
 const CATEGORIES = [
   { label: 'Tech', color: 'bg-blue-500' },

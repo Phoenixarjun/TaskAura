@@ -20,7 +20,9 @@ const modalAnim = {
   exit: { opacity: 0, scale: 0.9, transition: { duration: 0.2 } },
 };
 
-const API_URL = 'http://localhost:4000/api/daily-tasks';
+import { API_ENDPOINTS } from '../utils/config';
+
+const API_URL = API_ENDPOINTS.dailyTasks;
 
 interface DailyTask {
   id: string;

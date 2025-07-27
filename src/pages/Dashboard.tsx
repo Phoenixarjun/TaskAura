@@ -10,6 +10,7 @@ import { loadFromStorage, getTodayKey, updateStreak } from '../utils/storage';
 import { getProgressChartData, getProgressStats, getLast7DaysProgress } from '../utils/dailyProgress';
 import { getWeeklyTasks } from '../utils/weeklyUtils';
 import { useTheme } from '../contexts/ThemeContext';
+import { API_ENDPOINTS } from '../utils/config';
 import { 
   CheckCircleIcon, 
   FireIcon, 
@@ -59,7 +60,7 @@ const Dashboard: React.FC = () => {
   // Check backend health
   const checkBackendHealth = async () => {
     try {
-      const response = await fetch('http://localhost:4000/api/health', { 
+      const response = await fetch(API_ENDPOINTS.health, { 
         method: 'GET',
         signal: AbortSignal.timeout(3000) // 3 second timeout
       });
@@ -112,9 +113,9 @@ const Dashboard: React.FC = () => {
       }
 
       const [weeklyResponse, learnResponse, dailyResponse] = await Promise.allSettled([
-        fetch('http://localhost:4000/api/weekly-tasks'),
-        fetch('http://localhost:4000/api/learn-history'),
-        fetch('http://localhost:4000/api/daily-tasks')
+        fetch(API_ENDPOINTS.weeklyTasks),
+        fetch(API_ENDPOINTS.learnHistory),
+        fetch(API_ENDPOINTS.dailyTasks)
       ]);
 
       // Handle weekly tasks

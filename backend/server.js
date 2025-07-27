@@ -4,10 +4,23 @@ const fs = require('fs');
 const path = require('path');
 
 const app = express();
-const PORT = 4000;
+const PORT = process.env.PORT || 4000;
+
+// CORS configuration
+const corsOptions = {
+  origin: [
+    'http://localhost:5173', // Vite dev server
+    'http://localhost:3000', // Alternative dev port
+    'https://your-netlify-app.netlify.app', // Replace with your actual Netlify URL
+    /\.netlify\.app$/, // Allow all Netlify subdomains
+    /\.netlify\.com$/  // Allow all Netlify domains
+  ],
+  credentials: true,
+  optionsSuccessStatus: 200
+};
 
 // Middleware
-app.use(cors());
+app.use(cors(corsOptions));
 app.use(express.json());
 
 // Ensure data directory exists
