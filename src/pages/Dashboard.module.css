@@ -96,11 +96,13 @@ html.dark .dashboard-quote {
 }
 
 html.dark .greeting {
-  background: linear-gradient(135deg, #e2e8f0 0%, #cbd5e1 50%, #94a3b8 100%);
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 50%, #e2e8f0 100%);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
   animation: gradient-shift-dark 3s ease-in-out infinite;
+  text-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+  filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.2));
 }
 
 @keyframes gradient-shift {
@@ -118,12 +120,12 @@ html.dark .greeting {
 
 @keyframes gradient-shift-dark {
   0%, 100% { 
-    background: linear-gradient(135deg, #e2e8f0 0%, #cbd5e1 50%, #94a3b8 100%);
+    background: linear-gradient(135deg, #ffffff 0%, #f8fafc 50%, #e2e8f0 100%);
     -webkit-background-clip: text;
     background-clip: text;
   }
   50% { 
-    background: linear-gradient(135deg, #94a3b8 0%, #e2e8f0 50%, #cbd5e1 100%);
+    background: linear-gradient(135deg, #e2e8f0 0%, #ffffff 50%, #f8fafc 100%);
     -webkit-background-clip: text;
     background-clip: text;
   }

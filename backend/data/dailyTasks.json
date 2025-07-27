@@ -62,25 +62,11 @@
   ],
   "dailyTasks-2025-07-27": [
     {
-      "id": "175bccb0-d4ff-4feb-917c-5b52d41a3dc8",
-      "title": "do the shell programming",
+      "id": "d47ef54e-d2e7-460f-abd2-3cff8acb4230",
+      "title": "Learn Day 2 oracle Content",
       "description": "",
       "isCompleted": false,
-      "createdAt": "2025-07-27T10:32:00.486Z"
-    },
-    {
-      "id": "f16cc9e0-d659-4932-a470-f435b305c15c",
-      "title": "Complete ML Project",
-      "description": "",
-      "isCompleted": true,
-      "createdAt": "2025-07-27T10:31:42.809Z"
-    },
-    {
-      "id": "79aacf6a-5ff4-418b-93d3-11dcf467fd80",
-      "title": "Learn Oracle Day 2",
-      "description": "Prepare For Oracle Day 2 Content",
-      "isCompleted": false,
-      "createdAt": "2025-07-27T10:31:31.094Z"
+      "createdAt": "2025-07-27T10:39:44.208Z"
     }
   ]
 }
