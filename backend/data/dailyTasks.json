@@ -62,6 +62,27 @@
   ],
   "dailyTasks-2025-07-27": [
     {
+      "id": "f6bad36f-fcdc-4832-a802-f156cc8e9be4",
+      "title": "complete nxtwace ml project",
+      "description": "",
+      "isCompleted": true,
+      "createdAt": "2025-07-27T10:58:04.013Z"
+    },
+    {
+      "id": "7dc33ae9-05ed-4fda-a58f-b6dc3c003fdb",
+      "title": "write a blog",
+      "description": "",
+      "isCompleted": true,
+      "createdAt": "2025-07-27T10:57:53.237Z"
+    },
+    {
+      "id": "2dda6978-5a0e-49cd-a7a2-0d5406dd1b80",
+      "title": "prepare for shell programming exam",
+      "description": "",
+      "isCompleted": false,
+      "createdAt": "2025-07-27T10:57:36.754Z"
+    },
+    {
       "id": "d47ef54e-d2e7-460f-abd2-3cff8acb4230",
       "title": "Learn Day 2 oracle Content",
       "description": "",

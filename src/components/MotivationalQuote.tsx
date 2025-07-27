@@ -19,10 +19,16 @@ const MotivationalQuote: React.FC = () => {
     return quotes[Math.floor(Math.random() * quotes.length)];
   }, []);
 
-  const { colors } = useTheme();
+  const { isDark } = useTheme();
 
   return (
-    <div className="dashboard-quote">
+    <div 
+      className="dashboard-quote"
+      style={{ 
+        color: isDark ? '#ffffff' : '#334155',
+        textShadow: isDark ? '0 0 10px rgba(255, 255, 255, 0.2)' : 'none'
+      }}
+    >
       "{quote}"
     </div>
   );

@@ -469,12 +469,32 @@ const Dashboard: React.FC = () => {
         >
           <div className={styles.heroContent}>
             <div className={styles.greetingSection}>
-              <h1 className={styles.greeting}>{greeting}!</h1>
-              <div className={styles.timeDisplay}>
+              <h1 
+                className={styles.greeting}
+                style={{ 
+                  color: isDark ? '#ffffff' : '#1e293b',
+                  textShadow: isDark ? '0 0 20px rgba(255, 255, 255, 0.3)' : 'none'
+                }}
+              >
+                {greeting}!
+              </h1>
+              <div 
+                className={styles.timeDisplay}
+                style={{ 
+                  color: isDark ? '#ffffff' : '#475569',
+                  textShadow: isDark ? '0 0 10px rgba(255, 255, 255, 0.2)' : 'none'
+                }}
+              >
                 <ClockIcon className={styles.timeIcon} />
                 <span className={styles.time}>{formatTime(currentTime)}</span>
               </div>
-              <div className={styles.dateDisplay}>
+              <div 
+                className={styles.dateDisplay}
+                style={{ 
+                  color: isDark ? '#ffffff' : '#475569',
+                  textShadow: isDark ? '0 0 10px rgba(255, 255, 255, 0.2)' : 'none'
+                }}
+              >
                 <CalendarIcon className={styles.dateIcon} />
                 <span className={styles.date}>{formatDate(currentTime)}</span>
               </div>
@@ -597,51 +617,53 @@ const Dashboard: React.FC = () => {
               <span className={styles.cardTitle}>Weekly Task Progress</span>
             </div>
             <div className={styles.chartContainer}>
-              <Bar 
-                data={weeklyProgressData} 
-                options={{ 
-                  responsive: true, 
-                  maintainAspectRatio: false,
-                  plugins: { 
-                    legend: { display: false },
-                    tooltip: {
-                      backgroundColor: isDark ? 'rgba(30, 41, 59, 0.95)' : 'rgba(0, 0, 0, 0.8)',
-                      titleColor: isDark ? '#e2e8f0' : '#fff',
-                      bodyColor: isDark ? '#e2e8f0' : '#fff',
-                      borderColor: isDark ? 'rgba(99, 102, 241, 0.5)' : '#6366f1',
-                      borderWidth: 1,
-                      cornerRadius: 8,
-                      displayColors: false
-                    }
-                  },
-                  scales: {
-                    y: {
-                      beginAtZero: true,
-                      ticks: {
-                        stepSize: 1,
-                        color: isDark ? '#94a3b8' : '#64748b',
-                        font: {
-                          size: 12
-                        }
-                      },
-                      grid: {
-                        color: isDark ? 'rgba(148, 163, 184, 0.1)' : 'rgba(100, 116, 139, 0.1)'
+              <div className={styles.chartWrapper}>
+                <Bar 
+                  data={weeklyProgressData} 
+                  options={{ 
+                    responsive: true, 
+                    maintainAspectRatio: false,
+                    plugins: { 
+                      legend: { display: false },
+                      tooltip: {
+                        backgroundColor: isDark ? 'rgba(30, 41, 59, 0.95)' : 'rgba(0, 0, 0, 0.8)',
+                        titleColor: isDark ? '#e2e8f0' : '#fff',
+                        bodyColor: isDark ? '#e2e8f0' : '#fff',
+                        borderColor: isDark ? 'rgba(99, 102, 241, 0.5)' : '#6366f1',
+                        borderWidth: 1,
+                        cornerRadius: 8,
+                        displayColors: false
                       }
                     },
-                    x: {
-                      ticks: {
-                        color: isDark ? '#94a3b8' : '#64748b',
-                        font: {
-                          size: 12
+                    scales: {
+                      y: {
+                        beginAtZero: true,
+                        ticks: {
+                          stepSize: 1,
+                          color: isDark ? '#94a3b8' : '#64748b',
+                          font: {
+                            size: 12
+                          }
+                        },
+                        grid: {
+                          color: isDark ? 'rgba(148, 163, 184, 0.1)' : 'rgba(100, 116, 139, 0.1)'
                         }
                       },
-                      grid: {
-                        color: isDark ? 'rgba(148, 163, 184, 0.1)' : 'rgba(100, 116, 139, 0.1)'
+                      x: {
+                        ticks: {
+                          color: isDark ? '#94a3b8' : '#64748b',
+                          font: {
+                            size: 12
+                          }
+                        },
+                        grid: {
+                          color: isDark ? 'rgba(148, 163, 184, 0.1)' : 'rgba(100, 116, 139, 0.1)'
+                        }
                       }
                     }
-                  }
-                }} 
-              />
+                  }} 
+                />
+              </div>
             </div>
           </motion.div>
 
@@ -658,51 +680,53 @@ const Dashboard: React.FC = () => {
               <span className={styles.cardTitle}>Daily Task Completion</span>
             </div>
             <div className={styles.chartContainer}>
-              <Line 
-                data={dailyCompletionData} 
-                options={{ 
-                  responsive: true, 
-                  maintainAspectRatio: false,
-                  plugins: { 
-                    legend: { display: false },
-                    tooltip: {
-                      backgroundColor: isDark ? 'rgba(30, 41, 59, 0.95)' : 'rgba(0, 0, 0, 0.8)',
-                      titleColor: isDark ? '#e2e8f0' : '#fff',
-                      bodyColor: isDark ? '#e2e8f0' : '#fff',
-                      borderColor: isDark ? 'rgba(16, 185, 129, 0.5)' : '#10b981',
-                      borderWidth: 1,
-                      cornerRadius: 8,
-                      displayColors: false
-                    }
-                  },
-                  scales: {
-                    y: {
-                      beginAtZero: true,
-                      ticks: {
-                        stepSize: 1,
-                        color: isDark ? '#94a3b8' : '#64748b',
-                        font: {
-                          size: 12
-                        }
-                      },
-                      grid: {
-                        color: isDark ? 'rgba(148, 163, 184, 0.1)' : 'rgba(100, 116, 139, 0.1)'
+              <div className={styles.chartWrapper}>
+                <Line 
+                  data={dailyCompletionData} 
+                  options={{ 
+                    responsive: true, 
+                    maintainAspectRatio: false,
+                    plugins: { 
+                      legend: { display: false },
+                      tooltip: {
+                        backgroundColor: isDark ? 'rgba(30, 41, 59, 0.95)' : 'rgba(0, 0, 0, 0.8)',
+                        titleColor: isDark ? '#e2e8f0' : '#fff',
+                        bodyColor: isDark ? '#e2e8f0' : '#fff',
+                        borderColor: isDark ? 'rgba(16, 185, 129, 0.5)' : '#10b981',
+                        borderWidth: 1,
+                        cornerRadius: 8,
+                        displayColors: false
                       }
                     },
-                    x: {
-                      ticks: {
-                        color: isDark ? '#94a3b8' : '#64748b',
-                        font: {
-                          size: 12
+                    scales: {
+                      y: {
+                        beginAtZero: true,
+                        ticks: {
+                          stepSize: 1,
+                          color: isDark ? '#94a3b8' : '#64748b',
+                          font: {
+                            size: 12
+                          }
+                        },
+                        grid: {
+                          color: isDark ? 'rgba(148, 163, 184, 0.1)' : 'rgba(100, 116, 139, 0.1)'
                         }
                       },
-                      grid: {
-                        color: isDark ? 'rgba(148, 163, 184, 0.1)' : 'rgba(100, 116, 139, 0.1)'
+                      x: {
+                        ticks: {
+                          color: isDark ? '#94a3b8' : '#64748b',
+                          font: {
+                            size: 12
+                          }
+                        },
+                        grid: {
+                          color: isDark ? 'rgba(148, 163, 184, 0.1)' : 'rgba(100, 116, 139, 0.1)'
+                        }
                       }
                     }
-                  }
-                }} 
-              />
+                  }} 
+                />
+              </div>
             </div>
           </motion.div>
 
@@ -719,51 +743,53 @@ const Dashboard: React.FC = () => {
               <span className={styles.cardTitle}>Learning Rate Growth</span>
             </div>
             <div className={styles.chartContainer}>
-              <Line 
-                data={learningRateData} 
-                options={{ 
-                  responsive: true, 
-                  maintainAspectRatio: false,
-                  plugins: { 
-                    legend: { display: false },
-                    tooltip: {
-                      backgroundColor: isDark ? 'rgba(30, 41, 59, 0.95)' : 'rgba(0, 0, 0, 0.8)',
-                      titleColor: isDark ? '#e2e8f0' : '#fff',
-                      bodyColor: isDark ? '#e2e8f0' : '#fff',
-                      borderColor: isDark ? 'rgba(168, 85, 247, 0.5)' : '#a855f7',
-                      borderWidth: 1,
-                      cornerRadius: 8,
-                      displayColors: false
-                    }
-                  },
-                  scales: {
-                    y: {
-                      beginAtZero: true,
-                      ticks: {
-                        stepSize: 1,
-                        color: isDark ? '#94a3b8' : '#64748b',
-                        font: {
-                          size: 12
-                        }
-                      },
-                      grid: {
-                        color: isDark ? 'rgba(148, 163, 184, 0.1)' : 'rgba(100, 116, 139, 0.1)'
+              <div className={styles.chartWrapper}>
+                <Line 
+                  data={learningRateData} 
+                  options={{ 
+                    responsive: true, 
+                    maintainAspectRatio: false,
+                    plugins: { 
+                      legend: { display: false },
+                      tooltip: {
+                        backgroundColor: isDark ? 'rgba(30, 41, 59, 0.95)' : 'rgba(0, 0, 0, 0.8)',
+                        titleColor: isDark ? '#e2e8f0' : '#fff',
+                        bodyColor: isDark ? '#e2e8f0' : '#fff',
+                        borderColor: isDark ? 'rgba(168, 85, 247, 0.5)' : '#a855f7',
+                        borderWidth: 1,
+                        cornerRadius: 8,
+                        displayColors: false
                       }
                     },
-                    x: {
-                      ticks: {
-                        color: isDark ? '#94a3b8' : '#64748b',
-                        font: {
-                          size: 12
+                    scales: {
+                      y: {
+                        beginAtZero: true,
+                        ticks: {
+                          stepSize: 1,
+                          color: isDark ? '#94a3b8' : '#64748b',
+                          font: {
+                            size: 12
+                          }
+                        },
+                        grid: {
+                          color: isDark ? 'rgba(148, 163, 184, 0.1)' : 'rgba(100, 116, 139, 0.1)'
                         }
                       },
-                      grid: {
-                        color: isDark ? 'rgba(148, 163, 184, 0.1)' : 'rgba(100, 116, 139, 0.1)'
+                      x: {
+                        ticks: {
+                          color: isDark ? '#94a3b8' : '#64748b',
+                          font: {
+                            size: 12
+                          }
+                        },
+                        grid: {
+                          color: isDark ? 'rgba(148, 163, 184, 0.1)' : 'rgba(100, 116, 139, 0.1)'
+                        }
                       }
                     }
-                  }
-                }} 
-              />
+                  }} 
+                />
+              </div>
             </div>
           </motion.div>
 
@@ -780,25 +806,27 @@ const Dashboard: React.FC = () => {
               <span className={styles.cardTitle}>Learning Streak</span>
             </div>
             <div className={styles.chartContainer}>
-              <Doughnut 
-                data={learningStreakData} 
-                options={{ 
-                  responsive: true, 
-                  maintainAspectRatio: false,
-                  plugins: { 
-                    legend: { display: false },
-                    tooltip: {
-                      backgroundColor: isDark ? 'rgba(30, 41, 59, 0.95)' : 'rgba(0, 0, 0, 0.8)',
-                      titleColor: isDark ? '#e2e8f0' : '#fff',
-                      bodyColor: isDark ? '#e2e8f0' : '#fff',
-                      borderColor: isDark ? 'rgba(239, 68, 68, 0.5)' : '#ef4444',
-                      borderWidth: 1,
-                      cornerRadius: 8,
-                      displayColors: false
+              <div className={styles.chartWrapper}>
+                <Doughnut 
+                  data={learningStreakData} 
+                  options={{ 
+                    responsive: true, 
+                    maintainAspectRatio: false,
+                    plugins: { 
+                      legend: { display: false },
+                      tooltip: {
+                        backgroundColor: isDark ? 'rgba(30, 41, 59, 0.95)' : 'rgba(0, 0, 0, 0.8)',
+                        titleColor: isDark ? '#e2e8f0' : '#fff',
+                        bodyColor: isDark ? '#e2e8f0' : '#fff',
+                        borderColor: isDark ? 'rgba(239, 68, 68, 0.5)' : '#ef4444',
+                        borderWidth: 1,
+                        cornerRadius: 8,
+                        displayColors: false
+                      }
                     }
-                  }
-                }} 
-              />
+                  }} 
+                />
+              </div>
             </div>
             <div className={styles.streakStats}>
               <div className={styles.streakStat}>
@@ -821,7 +849,13 @@ const Dashboard: React.FC = () => {
           className={styles.latestLearnings}
         >
           <div className={styles.learningsHeader}>
-            <h2 className={styles.learningsTitle}>
+            <h2 
+              className={styles.learningsTitle}
+              style={{ 
+                color: isDark ? '#ffffff' : '#1e293b',
+                textShadow: isDark ? '0 0 10px rgba(255, 255, 255, 0.3)' : 'none'
+              }}
+            >
               <BookOpenIcon className={styles.learningsIcon} />
               Latest Learnings
             </h2>
@@ -884,7 +918,9 @@ const Dashboard: React.FC = () => {
           >
             <div className={styles.cardHeader}>
               <CheckCircleIcon className={styles.cardIcon} />
-              <span className={styles.cardTitle}>Weekly Goals</span>
+              <span className={styles.cardTitle}>
+                Weekly Goals
+              </span>
             </div>
             {weeklyTotal > 0 ? (
               <>
@@ -929,7 +965,9 @@ const Dashboard: React.FC = () => {
           >
             <div className={styles.cardHeader}>
               <SunIcon className={styles.cardIcon} />
-              <span className={styles.cardTitle}>Daily Focus</span>
+              <span className={styles.cardTitle}>
+                Daily Focus
+              </span>
             </div>
             <div className={styles.dailyProgress}>
               <div className={styles.progressRing}>
@@ -994,7 +1032,9 @@ const Dashboard: React.FC = () => {
           >
             <div className={styles.cardHeader}>
               <FireIcon className={styles.cardIcon} />
-              <span className={styles.cardTitle}>Learning Streak</span>
+              <span className={styles.cardTitle}>
+                Learning Streak
+              </span>
             </div>
             <div className={styles.streakDisplay}>
               <StreakDisplay streak={streak} />
@@ -1109,7 +1149,13 @@ const Dashboard: React.FC = () => {
             transition={{ delay: 0.5 }}
             className={styles.achievementsSection}
           >
-            <h2 className={styles.achievementsTitle}>
+            <h2 
+              className={styles.achievementsTitle}
+              style={{ 
+                color: isDark ? '#ffffff' : '#1e293b',
+                textShadow: isDark ? '0 0 10px rgba(255, 255, 255, 0.3)' : 'none'
+              }}
+            >
               <StarIcon className={styles.achievementsIcon} />
               Your Achievements
             </h2>
@@ -1141,7 +1187,15 @@ const Dashboard: React.FC = () => {
           transition={{ delay: 0.7 }}
           className={styles.quickActions}
         >
-          <h2 className={styles.actionsTitle}>Quick Actions</h2>
+          <h2 
+            className={styles.actionsTitle}
+            style={{ 
+              color: isDark ? '#ffffff' : '#1e293b',
+              textShadow: isDark ? '0 0 10px rgba(255, 255, 255, 0.3)' : 'none'
+            }}
+          >
+            Quick Actions
+          </h2>
           <div className={styles.actionsGrid}>
             <motion.button
               whileHover={{ scale: 1.05, y: -2 }}
