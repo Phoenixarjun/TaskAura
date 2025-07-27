@@ -4,17 +4,17 @@ const fs = require('fs');
 const path = require('path');
 
 const app = express();
-const PORT = process.env.PORT || 4000;
 
-// CORS configuration
+// CORS configuration for Vercel
 const corsOptions = {
   origin: [
     'http://localhost:5173', // Vite dev server
     'http://localhost:3000', // Alternative dev port
-    'https://task-aura-980f34.netlify.app/dashboard',
-    'https://taskaura-epbivpexy-naresh-b-as-projects.vercel.app/api/', // Replace with your actual Netlify URL
+    'https://task-aura-980f34.netlify.app', // Your Netlify URL
+    'https://task-aura-980f34.netlify.app', // Your Netlify URL
     /\.netlify\.app$/, // Allow all Netlify subdomains
-    /\.netlify\.com$/  // Allow all Netlify domains
+    /\.netlify\.com$/, // Allow all Netlify domains
+    /\.vercel\.app$/  // Allow all Vercel domains
   ],
   credentials: true,
   optionsSuccessStatus: 200
@@ -24,28 +24,32 @@ const corsOptions = {
 app.use(cors(corsOptions));
 app.use(express.json());
 
-// Ensure data directory exists
-const dataDir = path.join(__dirname, 'data');
-if (!fs.existsSync(dataDir)) {
-  fs.mkdirSync(dataDir, { recursive: true });
-}
-
-// File paths
+// For Vercel, we'll use /tmp directory for file storage
+const dataDir = '/tmp';
 const weeklyTasksFile = path.join(dataDir, 'weeklyTasks.json');
 const learnHistoryFile = path.join(dataDir, 'learnHistory.json');
 const dailyTasksFile = path.join(dataDir, 'dailyTasks.json');
 
 // Initialize files if they don't exist
 const initializeFile = (filePath, defaultValue) => {
-  if (!fs.existsSync(filePath)) {
-    fs.writeFileSync(filePath, JSON.stringify(defaultValue, null, 2));
-    console.log(`Initialized ${path.basename(filePath)}`);
+  try {
+    if (!fs.existsSync(filePath)) {
+      fs.writeFileSync(filePath, JSON.stringify(defaultValue, null, 2));
+      console.log(`Initialized ${path.basename(filePath)}`);
+    }
+  } catch (error) {
+    console.error(`Error initializing ${filePath}:`, error.message);
   }
 };
 
-initializeFile(weeklyTasksFile, []);
-initializeFile(learnHistoryFile, []);
-initializeFile(dailyTasksFile, {});
+// Initialize files on module load
+try {
+  initializeFile(weeklyTasksFile, []);
+  initializeFile(learnHistoryFile, []);
+  initializeFile(dailyTasksFile, {});
+} catch (error) {
+  console.error('Error during file initialization:', error.message);
+}
 
 // Helper function to read JSON files safely
 const readJsonFile = (filePath, defaultValue) => {
@@ -175,7 +179,7 @@ app.get('/api/health', (req, res) => {
   res.json({ 
     status: 'ok', 
     timestamp: new Date().toISOString(),
-    uptime: process.uptime()
+    environment: 'vercel-serverless'
   });
 });
 
@@ -185,36 +189,5 @@ app.use((error, req, res, next) => {
   res.status(500).json({ error: 'Internal server error' });
 });
 
-// Graceful shutdown
-process.on('SIGINT', () => {
-  console.log('\nReceived SIGINT. Shutting down gracefully...');
-  process.exit(0);
-});
-
-process.on('SIGTERM', () => {
-  console.log('\nReceived SIGTERM. Shutting down gracefully...');
-  process.exit(0);
-});
-
-// Uncaught exception handler
-process.on('uncaughtException', (error) => {
-  console.error('Uncaught Exception:', error);
-  // Don't exit immediately, let the server continue running
-});
-
-// Unhandled rejection handler
-process.on('unhandledRejection', (reason, promise) => {
-  console.error('Unhandled Rejection at:', promise, 'reason:', reason);
-  // Don't exit immediately, let the server continue running
-});
-
-// Start server
-app.listen(PORT, () => {
-  console.log(`🚀 Backend server running on port ${PORT}`);
-  console.log(`📁 Data directory: ${dataDir}`);
-  console.log(`🔗 Health check: http://localhost:${PORT}/api/health`);
-  console.log(`📊 API endpoints:`);
-  console.log(`   GET/POST http://localhost:${PORT}/api/weekly-tasks`);
-  console.log(`   GET/POST http://localhost:${PORT}/api/learn-history`);
-  console.log(`   GET/POST http://localhost:${PORT}/api/daily-tasks`);
-}); 
+// Export for Vercel serverless
+module.exports = app; 
