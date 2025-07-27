@@ -4,11 +4,6 @@ import {
   getCurrentWeekRange,
   isNewWeek,
   resetWeeklyTasks,
-  getWeeklyTasks,
-  saveWeeklyTasks,
-  addWeeklyTask,
-  updateWeeklyTask,
-  deleteWeeklyTask,
   getWeekStartDate,
 } from '../utils/weeklyUtils';
 import { v4 as uuidv4 } from 'uuid';
@@ -31,6 +26,8 @@ const modalAnim = {
   exit: { opacity: 0, scale: 0.9, transition: { duration: 0.2 } },
 };
 
+const API_URL = 'http://localhost:4000/api/weekly-tasks';
+
 function Weekly() {
   // State
   const [tasks, setTasks] = useState<any[]>([]);
@@ -43,14 +40,67 @@ function Weekly() {
   const [desc, setDesc] = useState('');
   // Add error state for title
   const [formError, setFormError] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [showSavedBadge, setShowSavedBadge] = useState(false);
 
-  // Auto-reset on Sunday
+  // Load tasks from backend on mount
   useEffect(() => {
-    if (isNewWeek()) {
-      resetWeeklyTasks();
-    }
-    setTasks(getWeeklyTasks());
+    setLoading(true);
+    fetch(API_URL)
+      .then(res => res.json())
+      .then(data => setTasks(data))
+      .catch(() => toast.error('Failed to load weekly tasks'))
+      .finally(() => setLoading(false));
   }, []);
+
+  // Save tasks to backend
+  const saveWeeklyTasks = async (tasksToSave: any[]) => {
+    setLoading(true);
+    try {
+      const response = await fetch(API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(tasksToSave),
+      });
+      
+      if (response.ok) {
+        toast.success('✅ Weekly tasks saved successfully to backend!', {
+          duration: 3000,
+          position: 'bottom-center',
+          style: {
+            background: '#6366f1',
+            color: 'white',
+            fontWeight: 'bold'
+          }
+        });
+        setShowSavedBadge(true);
+        setTimeout(() => setShowSavedBadge(false), 2000);
+      } else {
+        toast.error('❌ Failed to save weekly tasks. Server error.', {
+          duration: 4000,
+          position: 'bottom-center',
+          style: {
+            background: '#ef4444',
+            color: 'white',
+            fontWeight: 'bold'
+          }
+        });
+      }
+    } catch (error) {
+      toast.error('🔌 Connection error! Please check if backend server is running.', {
+        duration: 5000,
+        position: 'bottom-center',
+        style: {
+          background: '#f59e0b',
+          color: 'white',
+          fontWeight: 'bold'
+        }
+      });
+      console.error('Save error:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Progress
   const completed = tasks.filter((t) => t.isCompleted).length;
@@ -104,7 +154,7 @@ function Weekly() {
   };
 
   // Add/Edit Task
-  const handleSaveTask = (e: React.FormEvent) => {
+  const handleSaveTask = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!title.trim()) {
       setFormError('Task title is required');
@@ -112,37 +162,77 @@ function Weekly() {
     }
     setFormError('');
     if (modalMode === 'add') {
-      const newTask = addWeeklyTask(title.trim(), desc.trim());
-      setTasks([...tasks, newTask]);
+      const newTask = {
+        id: uuidv4(),
+        title: title.trim(),
+        description: desc.trim(),
+        isCompleted: false,
+        createdAt: new Date().toISOString(),
+      };
+      const updated = [newTask, ...tasks];
+      setTasks(updated);
+      await saveWeeklyTasks(updated);
+      
+      // Notify dashboard of task update
+      window.dispatchEvent(new CustomEvent('taskUpdated'));
     } else if (editTask) {
       const updated = { ...editTask, title: title.trim(), description: desc.trim() };
       const updatedTasks = tasks.map((t) => (t.id === editTask.id ? updated : t));
-      saveWeeklyTasks(updatedTasks);
       setTasks(updatedTasks);
+      await saveWeeklyTasks(updatedTasks);
+      
+      // Notify dashboard of task update
+      window.dispatchEvent(new CustomEvent('taskUpdated'));
     }
     closeModal();
   };
 
   // Toggle complete
-  const handleToggle = (id: string) => {
+  const handleToggle = async (id: string) => {
     const updatedTasks = tasks.map((t) =>
       t.id === id ? { ...t, isCompleted: !t.isCompleted } : t
     );
-    saveWeeklyTasks(updatedTasks);
     setTasks(updatedTasks);
+    await saveWeeklyTasks(updatedTasks);
+    
+    // Notify dashboard of task update
+    window.dispatchEvent(new CustomEvent('taskUpdated'));
   };
 
   // Delete
-  const handleDelete = (id: string) => {
-    deleteWeeklyTask(id);
-    setTasks(tasks.filter((t) => t.id !== id));
+  const handleDelete = async (id: string) => {
+    const updatedTasks = tasks.filter((t) => t.id !== id);
+    setTasks(updatedTasks);
+    await saveWeeklyTasks(updatedTasks);
+    
+    // Notify dashboard of task update
+    window.dispatchEvent(new CustomEvent('taskUpdated'));
   };
 
   // Reset week
-  const handleReset = () => {
-    resetWeeklyTasks();
+  const handleReset = async () => {
     setTasks([]);
+    await saveWeeklyTasks([]);
     setShowReset(false);
+    
+    // Notify dashboard of task update
+    window.dispatchEvent(new CustomEvent('taskUpdated'));
+  };
+
+  // Manual Save button
+  const handleManualSave = async () => {
+    if (tasks.length === 0) {
+      toast.error('📝 No tasks to save. Add some weekly tasks first!', {
+        duration: 3000,
+        style: {
+          background: '#f59e0b',
+          color: 'white',
+          fontWeight: 'bold'
+        }
+      });
+      return;
+    }
+    await saveWeeklyTasks(tasks);
   };
 
   return (
@@ -191,6 +281,16 @@ function Weekly() {
         >
           <PlusIcon className="add-icon" /> Add Task
         </button>
+        <button
+          className="weekly-save-btn"
+          onClick={handleManualSave}
+          disabled={loading}
+        >
+          {loading ? 'Saving...' : 'Save'}
+        </button>
+        {showSavedBadge && (
+          <span className="saved-badge">Saved!</span>
+        )}
       </div>
       {/* Task List */}
       <div className="weekly-task-list">
@@ -224,7 +324,7 @@ function Weekly() {
                       <span className="task-status-dot"></span>
                       <span className={`task-title${task.isCompleted ? ' completed' : ''}`}>{task.title}</span>
                     </div>
-                    {task.description && <div className="task-description">{task.description}</div>}
+                    {task.description && <div className={`task-description${task.isCompleted ? ' completed' : ''}`}>{task.description}</div>}
                   </div>
                   <div className="task-actions">
                     <button

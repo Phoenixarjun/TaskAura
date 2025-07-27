@@ -1,0 +1,86 @@
+{
+  "date": "dailyTasks-2025-07-26",
+  "tasks": [
+    {
+      "id": "9e6c0eb3-7e90-4124-a189-3443c6b2e307",
+      "title": "Oracle Course",
+      "description": "Need to complete oracle course by the end of the day.",
+      "isCompleted": true,
+      "createdAt": "2025-07-26T12:32:16.255Z"
+    },
+    {
+      "id": "fb56f9f0-a55b-4f9d-a30f-2950e6a7565c",
+      "title": "Learn and Code Java",
+      "description": "Need to watch Java DSA and so 1 program",
+      "isCompleted": false,
+      "createdAt": "2025-07-26T12:31:54.782Z"
+    },
+    {
+      "id": "9ec413e4-bbe6-482e-93e6-1f73c9348ca0",
+      "title": "Nxtwave ML Capstone Project",
+      "description": "Capstone Project in nxtwave need to be completed and need to submit to the website",
+      "isCompleted": false,
+      "createdAt": "2025-07-26T12:31:34.765Z"
+    },
+    {
+      "id": "43c59e5e-e4ba-4cdf-9298-8b43259acada",
+      "title": "Read Shell Programming",
+      "description": "Revise the concept of shell programming for the exam.",
+      "isCompleted": false,
+      "createdAt": "2025-07-26T12:14:32.548Z"
+    }
+  ],
+  "dailyTasks-2025-07-26": [
+    {
+      "id": "9e6c0eb3-7e90-4124-a189-3443c6b2e307",
+      "title": "Oracle Course",
+      "description": "Need to complete oracle course by the end of the day.",
+      "isCompleted": true,
+      "createdAt": "2025-07-26T12:32:16.255Z"
+    },
+    {
+      "id": "fb56f9f0-a55b-4f9d-a30f-2950e6a7565c",
+      "title": "Learn and Code Java",
+      "description": "Need to watch Java DSA and so 1 program",
+      "isCompleted": true,
+      "createdAt": "2025-07-26T12:31:54.782Z"
+    },
+    {
+      "id": "9ec413e4-bbe6-482e-93e6-1f73c9348ca0",
+      "title": "Nxtwave ML Capstone Project",
+      "description": "Capstone Project in nxtwave need to be completed and need to submit to the website",
+      "isCompleted": false,
+      "createdAt": "2025-07-26T12:31:34.765Z"
+    },
+    {
+      "id": "43c59e5e-e4ba-4cdf-9298-8b43259acada",
+      "title": "Read Shell Programming",
+      "description": "Revise the concept of shell programming for the exam.",
+      "isCompleted": false,
+      "createdAt": "2025-07-26T12:14:32.548Z"
+    }
+  ],
+  "dailyTasks-2025-07-27": [
+    {
+      "id": "175bccb0-d4ff-4feb-917c-5b52d41a3dc8",
+      "title": "do the shell programming",
+      "description": "",
+      "isCompleted": false,
+      "createdAt": "2025-07-27T10:32:00.486Z"
+    },
+    {
+      "id": "f16cc9e0-d659-4932-a470-f435b305c15c",
+      "title": "Complete ML Project",
+      "description": "",
+      "isCompleted": true,
+      "createdAt": "2025-07-27T10:31:42.809Z"
+    },
+    {
+      "id": "79aacf6a-5ff4-418b-93d3-11dcf467fd80",
+      "title": "Learn Oracle Day 2",
+      "description": "Prepare For Oracle Day 2 Content",
+      "isCompleted": false,
+      "createdAt": "2025-07-27T10:31:31.094Z"
+    }
+  ]
+}

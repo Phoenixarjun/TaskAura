@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { v4 as uuidv4 } from 'uuid';
 import { Doughnut } from 'react-chartjs-2';
 import { Chart, ArcElement, Tooltip, Legend } from 'chart.js';
-import { PlusIcon, TrashIcon, PencilIcon } from '@heroicons/react/24/solid';
+import { PlusIcon, TrashIcon, PencilIcon, ArrowDownTrayIcon } from '@heroicons/react/24/solid';
 import { toast } from 'react-hot-toast';
 import './Daily.css';
 
@@ -19,6 +19,8 @@ const modalAnim = {
   visible: { opacity: 1, scale: 1, transition: { duration: 0.25 } },
   exit: { opacity: 0, scale: 0.9, transition: { duration: 0.2 } },
 };
+
+const API_URL = 'http://localhost:4000/api/daily-tasks';
 
 interface DailyTask {
   id: string;
@@ -67,11 +69,78 @@ function Daily() {
   const [title, setTitle] = useState('');
   const [desc, setDesc] = useState('');
   const [formError, setFormError] = useState('');
+  const [saving, setSaving] = useState(false);
+  const [showSavedBadge, setShowSavedBadge] = useState(false);
 
   // Load tasks for today
   useEffect(() => {
     setTasks(loadDailyTasks());
   }, []);
+
+  // Save daily tasks to backend
+  const saveToBackend = async () => {
+    if (tasks.length === 0) {
+      toast.error('📝 No tasks to save. Add some daily tasks first!', {
+        duration: 3000,
+        position: 'bottom-center',
+        style: {
+          background: '#f59e0b',
+          color: 'white',
+          fontWeight: 'bold'
+        }
+      });
+      return;
+    }
+    
+    setSaving(true);
+    try {
+      const response = await fetch(API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          date: getTodayKey(),
+          tasks: tasks
+        }),
+      });
+      
+      if (response.ok) {
+        toast.success('✅ Daily tasks saved successfully to backend!', {
+          duration: 3000,
+          position: 'bottom-center',
+          style: {
+            background: '#10b981',
+            color: 'white',
+            fontWeight: 'bold'
+          }
+        });
+        setShowSavedBadge(true);
+        setTimeout(() => setShowSavedBadge(false), 2000);
+      } else {
+        toast.error('❌ Failed to save daily tasks. Server error.', {
+          duration: 4000,
+          position: 'bottom-center',
+          style: {
+            background: '#ef4444',
+            color: 'white',
+            fontWeight: 'bold'
+          }
+        });
+      }
+    } catch (error) {
+      toast.error('🔌 Connection error! Please check if backend server is running.', {
+        duration: 5000,
+        position: 'bottom-center',
+        style: {
+          background: '#f59e0b',
+          color: 'white',
+          fontWeight: 'bold'
+        }
+      });
+      console.error('Save error:', error);
+    } finally {
+      setSaving(false);
+    }
+  };
 
   // Progress
   const completed = tasks.filter((t) => t.isCompleted).length;
@@ -147,12 +216,18 @@ function Daily() {
       setTasks(updated);
       saveDailyTasks(updated);
       toast.success('Task added successfully!');
+      
+      // Notify dashboard of task update
+      window.dispatchEvent(new CustomEvent('taskUpdated'));
     } else if (editTask) {
       const updated = { ...editTask, title: title.trim(), description: desc.trim() };
       const updatedTasks = tasks.map((t) => (t.id === editTask.id ? updated : t));
       saveDailyTasks(updatedTasks);
       setTasks(updatedTasks);
       toast.success('Task updated successfully!');
+      
+      // Notify dashboard of task update
+      window.dispatchEvent(new CustomEvent('taskUpdated'));
     }
     closeModal();
   };
@@ -164,6 +239,9 @@ function Daily() {
     );
     saveDailyTasks(updatedTasks);
     setTasks(updatedTasks);
+    
+    // Notify dashboard of task update
+    window.dispatchEvent(new CustomEvent('taskUpdated'));
   };
 
   // Delete
@@ -172,6 +250,9 @@ function Daily() {
     saveDailyTasks(updatedTasks);
     setTasks(updatedTasks);
     toast.success('Task deleted successfully!');
+    
+    // Notify dashboard of task update
+    window.dispatchEvent(new CustomEvent('taskUpdated'));
   };
 
   return (
@@ -217,6 +298,19 @@ function Daily() {
             <span className="progress-percent">{percent}%</span>
             <span className="progress-label">Complete</span>
           </div>
+        </div>
+        <div className="daily-header-controls">
+          <button
+            className="save-btn"
+            onClick={saveToBackend}
+            disabled={saving}
+          >
+            {saving ? 'Saving...' : 'Save Daily Tasks'}
+            <ArrowDownTrayIcon className="save-icon" />
+          </button>
+          {showSavedBadge && (
+            <span className="saved-badge">Saved!</span>
+          )}
         </div>
       </div>
 
@@ -271,7 +365,7 @@ function Daily() {
                       </span>
                     </div>
                     {task.description && (
-                      <div className="task-description">{task.description}</div>
+                      <div className={`task-description${task.isCompleted ? ' completed' : ''}`}>{task.description}</div>
                     )}
                   </div>
                   <div className="task-actions">

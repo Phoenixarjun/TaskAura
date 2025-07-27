@@ -1,10 +1,13 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { motion, AnimatePresence } from 'framer-motion';
-import { loadFromStorage, saveToStorage, updateStreak } from '../utils/storage';
+import { updateStreak } from '../utils/storage';
 import { PencilIcon, TrashIcon, FireIcon, PlusIcon, ChartBarIcon } from '@heroicons/react/24/solid';
+import { toast } from 'react-hot-toast';
 import './Learn.css';
 import BookOpenIcon from '@heroicons/react/24/solid/BookOpenIcon';
+
+const API_URL = 'http://localhost:4000/api/learn-history';
 
 const CATEGORIES = [
   { label: 'Tech', color: 'bg-blue-500' },
@@ -56,7 +59,7 @@ const QUOTES = [
 const randomQuote = QUOTES[Math.floor(Math.random() * QUOTES.length)];
 
 const Learn: React.FC = () => {
-  const [learnings, setLearnings] = useState<LearningEntry[]>(() => loadFromStorage('learnHistory'));
+  const [learnings, setLearnings] = useState<LearningEntry[]>([]);
   const [form, setForm] = useState({ title: '', description: '', category: 'Tech', source: '' });
   const [formError, setFormError] = useState('');
   const [showModal, setShowModal] = useState(false);
@@ -64,12 +67,73 @@ const Learn: React.FC = () => {
   const [editEntry, setEditEntry] = useState<LearningEntry | null>(null);
   const [showConfetti, setShowConfetti] = useState(false);
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [showSavedBadge, setShowSavedBadge] = useState(false);
 
   const today = getTodayISO();
   const streak = useMemo(() => updateStreak(learnings), [learnings]);
   const learningRate = learnings.length;
   const todayLearnings = learnings.filter(l => l.date === today);
   const pastLearnings = learnings.filter(l => l.date !== today);
+
+  // Load learnings from backend on mount
+  useEffect(() => {
+    setLoading(true);
+    fetch(API_URL)
+      .then(res => res.json())
+      .then(data => setLearnings(data))
+      .catch(() => alert('Failed to load learn history'))
+      .finally(() => setLoading(false));
+  }, []);
+
+  // Save learnings to backend
+  const saveLearnHistory = async (history: LearningEntry[]) => {
+    setLoading(true);
+    try {
+      const response = await fetch(API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(history),
+      });
+      
+      if (response.ok) {
+        toast.success('✅ Learning history saved successfully to backend!', {
+          duration: 3000,
+          position: 'bottom-center',
+          style: {
+            background: '#a855f7',
+            color: 'white',
+            fontWeight: 'bold'
+          }
+        });
+        setShowSavedBadge(true);
+        setTimeout(() => setShowSavedBadge(false), 2000);
+      } else {
+        toast.error('❌ Failed to save learning history. Server error.', {
+          duration: 4000,
+          position: 'bottom-center',
+          style: {
+            background: '#ef4444',
+            color: 'white',
+            fontWeight: 'bold'
+          }
+        });
+      }
+    } catch (error) {
+      toast.error('🔌 Connection error! Please check if backend server is running.', {
+        duration: 5000,
+        position: 'bottom-center',
+        style: {
+          background: '#f59e0b',
+          color: 'white',
+          fontWeight: 'bold'
+        }
+      });
+      console.error('Save error:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Milestone confetti
   useEffect(() => {
@@ -109,7 +173,7 @@ const Learn: React.FC = () => {
   };
 
   // Add/Edit
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.title.trim()) {
       setFormError('Title is required');
@@ -125,10 +189,12 @@ const Learn: React.FC = () => {
         source: form.source.trim(),
         date: today,
       };
-      
       const updated = [newEntry, ...learnings];
       setLearnings(updated);
-      saveToStorage('learnHistory', updated);
+      await saveLearnHistory(updated);
+      
+      // Notify dashboard of task update
+      window.dispatchEvent(new CustomEvent('taskUpdated'));
       closeModal();
     } else if (editEntry) {
       const updated = learnings.map((l) =>
@@ -143,7 +209,10 @@ const Learn: React.FC = () => {
           : l
       );
       setLearnings(updated);
-      saveToStorage('learnHistory', updated);
+      await saveLearnHistory(updated);
+      
+      // Notify dashboard of task update
+      window.dispatchEvent(new CustomEvent('taskUpdated'));
       closeModal();
     }
   };
@@ -153,17 +222,37 @@ const Learn: React.FC = () => {
     setDeleteId(id);
   };
 
-  const confirmDelete = () => {
+  const confirmDelete = async () => {
     if (!deleteId) return;
     const updated = learnings.filter((l) => l.id !== deleteId);
     setLearnings(updated);
-    saveToStorage('learnHistory', updated);
+    await saveLearnHistory(updated);
+    
+    // Notify dashboard of task update
+    window.dispatchEvent(new CustomEvent('taskUpdated'));
     setDeleteId(null);
     if (editEntry && editEntry.id === deleteId) closeModal();
   };
 
   const cancelDelete = () => {
     setDeleteId(null);
+  };
+
+  // Manual Save button
+  const handleManualSave = async () => {
+    if (learnings.length === 0) {
+      toast.error('📚 No learnings to save. Add some learning entries first!', {
+        duration: 3000,
+        position: 'bottom-center',
+        style: {
+          background: '#f59e0b',
+          color: 'white',
+          fontWeight: 'bold'
+        }
+      });
+      return;
+    }
+    await saveLearnHistory(learnings);
   };
 
   // --- UI ---
@@ -228,6 +317,13 @@ const Learn: React.FC = () => {
             >
               <PlusIcon className="add-icon" />
               Add Learning
+            </button>
+            <button
+              className="learn-save-btn"
+              onClick={handleManualSave}
+              disabled={loading}
+            >
+              {loading ? 'Saving...' : 'Save'}
             </button>
           </div>
           
@@ -376,7 +472,7 @@ const Learn: React.FC = () => {
           >
             <motion.form
               onSubmit={handleSubmit}
-              className="learn-modal"
+              className="modal-container learn-modal"
               initial="hidden"
               animate="visible"
               exit="exit"
@@ -435,6 +531,9 @@ const Learn: React.FC = () => {
                 >
                   {modalMode === 'add' ? 'Add Learning' : 'Save Changes'}
                 </button>
+                {showSavedBadge && (
+                  <span className="saved-badge">Saved!</span>
+                )}
               </div>
             </motion.form>
           </motion.div>

@@ -12,6 +12,8 @@
   "dependencies": {
     "@heroicons/react": "^2.2.0",
     "chart.js": "^4.5.0",
+    "cors": "^2.8.5",
+    "express": "^5.1.0",
     "framer-motion": "^12.23.9",
     "lucide-react": "^0.525.0",
     "react": "^19.1.0",
@@ -33,5 +35,18 @@
     "typescript": "~5.8.3",
     "typescript-eslint": "^8.35.1",
     "vite": "^7.0.4"
-  }
+  },
+  "description": "A beautifully animated productivity app built using React, TypeScript, Tailwind CSS, Framer Motion, and Chart.js.",
+  "main": "eslint.config.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Phoenixarjun/TaskAura.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Phoenixarjun/TaskAura/issues"
+  },
+  "homepage": "https://github.com/Phoenixarjun/TaskAura#readme"
 }

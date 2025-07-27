@@ -1,10 +1,10 @@
 import React from 'react';
 import { Bar, Doughnut } from 'react-chartjs-2';
-import { Chart as ChartJS, ArcElement, BarElement, CategoryScale, LinearScale, Tooltip, Legend } from 'chart.js';
+import { Chart as ChartJS, ArcElement, BarElement, CategoryScale, LinearScale, Tooltip, Legend, Filler } from 'chart.js';
 import { useTheme } from '../contexts/ThemeContext';
 import styles from '../pages/Dashboard.module.css';
 
-ChartJS.register(ArcElement, BarElement, CategoryScale, LinearScale, Tooltip, Legend);
+ChartJS.register(ArcElement, BarElement, CategoryScale, LinearScale, Tooltip, Legend, Filler);
 
 interface ChartCardProps {
   title: string;

@@ -1,0 +1,170 @@
+.data-manager-card {
+  background: rgba(255,255,255,0.85);
+  border-radius: 1.2rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+  padding: 1.5rem 2rem;
+  margin: 1.5rem auto 0 auto;
+  max-width: 480px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  border: 1px solid #e5e7eb;
+}
+
+.data-manager-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin-bottom: 1.2rem;
+  color: #1e293b;
+  letter-spacing: -0.01em;
+}
+
+.data-manager-actions {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.data-manager-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.6rem 1.1rem;
+  font-size: 1rem;
+  font-weight: 600;
+  border-radius: 0.8rem;
+  border: none;
+  background: #f1f5f9;
+  color: #334155;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+  outline: none;
+  position: relative;
+}
+.data-manager-btn.export {
+  background: linear-gradient(135deg, #2563eb 0%, #38bdf8 100%);
+  color: #fff;
+}
+.data-manager-btn.export:hover {
+  background: linear-gradient(135deg, #1d4ed8 0%, #0ea5e9 100%);
+}
+.data-manager-btn.import {
+  background: linear-gradient(135deg, #10b981 0%, #22d3ee 100%);
+  color: #fff;
+}
+.data-manager-btn.import:hover {
+  background: linear-gradient(135deg, #059669 0%, #06b6d4 100%);
+}
+.data-manager-btn.view {
+  background: #fbbf24;
+  color: #fff;
+}
+.data-manager-btn.view:hover {
+  background: #f59e42;
+}
+.data-manager-btn.clear {
+  background: #ef4444;
+  color: #fff;
+}
+.data-manager-btn.clear:hover {
+  background: #b91c1c;
+}
+.data-manager-icon {
+  width: 1.1em;
+  height: 1.1em;
+}
+.data-manager-btn input[type="file"] {
+  display: none;
+}
+
+.data-manager-sections {
+  width: 100%;
+  margin-top: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+}
+.data-section {
+  width: 100%;
+  background: #f8fafc;
+  border-radius: 0.7rem;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.03);
+  border: 1px solid #e5e7eb;
+  padding: 0.7rem 1rem 1rem 1rem;
+}
+.data-section-toggle {
+  width: 100%;
+  background: none;
+  border: none;
+  font-size: 1.08rem;
+  font-weight: 700;
+  color: #2563eb;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  padding: 0.3rem 0;
+  margin-bottom: 0.5rem;
+  transition: color 0.2s;
+}
+.data-section-toggle:hover {
+  color: #1d4ed8;
+}
+.data-section-chevron {
+  width: 1.2em;
+  height: 1.2em;
+}
+.data-section-content {
+  background: #f1f5f9;
+  border-radius: 0.5rem;
+  padding: 0.7rem 1rem;
+  font-size: 0.98rem;
+  color: #334155;
+  margin: 0;
+  overflow-x: auto;
+  max-height: 300px;
+}
+html.dark .data-manager-card {
+  background: rgba(30,41,59,0.92);
+  border-color: #313a4d;
+  color: #e5e7eb;
+}
+html.dark .data-manager-title {
+  color: #e5e7eb;
+}
+html.dark .data-manager-btn {
+  background: #232946;
+  color: #e5e7eb;
+}
+html.dark .data-manager-btn.export {
+  background: linear-gradient(135deg, #6366f1 0%, #22d3ee 100%);
+  color: #fff;
+}
+html.dark .data-manager-btn.import {
+  background: linear-gradient(135deg, #10b981 0%, #38bdf8 100%);
+  color: #fff;
+}
+html.dark .data-manager-btn.view {
+  background: #fbbf24;
+  color: #232946;
+}
+html.dark .data-manager-btn.clear {
+  background: #ef4444;
+  color: #fff;
+}
+html.dark .data-section {
+  background: #232946;
+  border-color: #313a4d;
+}
+html.dark .data-section-toggle {
+  color: #38bdf8;
+}
+html.dark .data-section-toggle:hover {
+  color: #22d3ee;
+}
+html.dark .data-section-content {
+  background: #181f2a;
+  color: #e5e7eb;
+} 
