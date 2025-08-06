@@ -10,7 +10,7 @@ import { loadFromStorage, getTodayKey, updateStreak } from '../utils/storage';
 import { getProgressChartData, getProgressStats, getLast7DaysProgress } from '../utils/dailyProgress';
 import { getWeeklyTasks } from '../utils/weeklyUtils';
 import { useTheme } from '../contexts/ThemeContext';
-import { API_ENDPOINTS } from '../utils/config';
+import { useAuth } from '../contexts/AuthContext';
 import { 
   CheckCircleIcon, 
   FireIcon, 
@@ -27,6 +27,7 @@ import {
 import { Line, Bar, Doughnut } from 'react-chartjs-2';
 import { Chart, CategoryScale, LinearScale, PointElement, LineElement, BarElement, Title, Tooltip, Legend, ArcElement, Filler } from 'chart.js';
 import styles from './Dashboard.module.css';
+import { weeklyTasksAPI, learnTasksAPI, dailyTasksAPI, healthAPI } from '../services/apiService';
 
 Chart.register(CategoryScale, LinearScale, PointElement, LineElement, BarElement, Title, Tooltip, Legend, ArcElement, Filler);
 
@@ -46,6 +47,7 @@ const cardVariants = {
 const Dashboard: React.FC = () => {
   const navigate = useNavigate();
   const { colors, isDark } = useTheme();
+  const { user, isLoading: authLoading } = useAuth();
   const [currentTime, setCurrentTime] = useState(new Date());
   const [greeting, setGreeting] = useState('');
   const [showConfetti, setShowConfetti] = useState(false);
@@ -57,20 +59,34 @@ const Dashboard: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [backendStatus, setBackendStatus] = useState<'connected' | 'disconnected' | 'checking'>('checking');
 
+  // Load data from localStorage (fast and reliable)
+  const loadDataFromLocalStorage = () => {
+    try {
+      const todayKey = getTodayKey();
+      const localDaily = loadFromStorage(todayKey);
+      const localWeekly = loadFromStorage('weeklyTasks');
+      const localLearn = loadFromStorage('learnHistory');
+      
+      setDailyTasks(Array.isArray(localDaily) ? localDaily : []);
+      setWeeklyTasks(Array.isArray(localWeekly) ? localWeekly : []);
+      setLearnHistory(Array.isArray(localLearn) ? localLearn : []);
+      
+      console.log('Loaded data from localStorage:', {
+        daily: localDaily?.length || 0,
+        weekly: localWeekly?.length || 0,
+        learn: localLearn?.length || 0
+      });
+    } catch (error) {
+      console.error('Error loading from localStorage:', error);
+    }
+  };
+
   // Check backend health
   const checkBackendHealth = async () => {
     try {
-      const response = await fetch(API_ENDPOINTS.health, { 
-        method: 'GET',
-        signal: AbortSignal.timeout(3000) // 3 second timeout
-      });
-      if (response.ok) {
-        setBackendStatus('connected');
-        return true;
-      } else {
-        setBackendStatus('disconnected');
-        return false;
-      }
+      await healthAPI.check();
+      setBackendStatus('connected');
+      return true;
     } catch (error) {
       console.warn('Backend health check failed:', error);
       setBackendStatus('disconnected');
@@ -78,27 +94,19 @@ const Dashboard: React.FC = () => {
     }
   };
 
-  // Fetch data from backend APIs
+  // Fetch data from backend APIs (background sync)
   const fetchDashboardData = async () => {
     try {
       setLoading(true);
       
-      // Check backend health first
-      const isBackendHealthy = await checkBackendHealth();
-      
-      if (!isBackendHealthy) {
-        // If backend is down, use localStorage only
-        console.warn('Backend is down, using localStorage only');
-        const todayKey = getTodayKey();
-        const localDaily = loadFromStorage(todayKey);
-        const localWeekly = loadFromStorage('weeklyTasks');
-        const localLearn = loadFromStorage('learnHistory');
+      // Check if user is authenticated
+      if (!user) {
+        console.log('User not authenticated, using localStorage only');
+        loadDataFromLocalStorage();
+        setBackendStatus('disconnected');
         
-        setDailyTasks(Array.isArray(localDaily) ? localDaily : []);
-        setWeeklyTasks(Array.isArray(localWeekly) ? localWeekly : []);
-        setLearnHistory(Array.isArray(localLearn) ? localLearn : []);
-        
-        toast.error('⚠️ Backend disconnected. Using local data only.', {
+        // Show info toast about demo mode
+        toast('Running in demo mode with local data', {
           duration: 4000,
           position: 'bottom-center',
           style: {
@@ -112,16 +120,30 @@ const Dashboard: React.FC = () => {
         return;
       }
 
+      // Check backend health first
+      const isBackendHealthy = await checkBackendHealth();
+      
+      if (!isBackendHealthy) {
+        console.warn('Backend is down, using localStorage only');
+        loadDataFromLocalStorage();
+        return;
+      }
+
       const [weeklyResponse, learnResponse, dailyResponse] = await Promise.allSettled([
-        fetch(API_ENDPOINTS.weeklyTasks),
-        fetch(API_ENDPOINTS.learnHistory),
-        fetch(API_ENDPOINTS.dailyTasks)
+        weeklyTasksAPI.getAll(),
+        learnTasksAPI.getAll(),
+        dailyTasksAPI.getAll()
       ]);
 
       // Handle weekly tasks
       if (weeklyResponse.status === 'fulfilled') {
-        const weeklyData = await weeklyResponse.value.json();
-        setWeeklyTasks(Array.isArray(weeklyData) ? weeklyData : []);
+        const weeklyData = weeklyResponse.value as any;
+        // Backend returns { message: string, tasks: array }
+        const tasks = weeklyData && weeklyData.tasks && Array.isArray(weeklyData.tasks) ? weeklyData.tasks : [];
+        setWeeklyTasks(tasks);
+        
+        // Also save to localStorage for offline access
+        localStorage.setItem('weeklyTasks', JSON.stringify(tasks));
       } else {
         console.warn('Weekly tasks API failed, using localStorage fallback');
         const localWeekly = loadFromStorage('weeklyTasks');
@@ -130,8 +152,13 @@ const Dashboard: React.FC = () => {
 
       // Handle learn history
       if (learnResponse.status === 'fulfilled') {
-        const learnData = await learnResponse.value.json();
-        setLearnHistory(Array.isArray(learnData) ? learnData : []);
+        const learnData = learnResponse.value as any;
+        // Backend returns array directly for learn tasks
+        const tasks = Array.isArray(learnData) ? learnData : [];
+        setLearnHistory(tasks);
+        
+        // Also save to localStorage for offline access
+        localStorage.setItem('learnHistory', JSON.stringify(tasks));
       } else {
         console.warn('Learn history API failed, using localStorage fallback');
         const localLearn = loadFromStorage('learnHistory');
@@ -140,24 +167,27 @@ const Dashboard: React.FC = () => {
 
       // Handle daily tasks
       if (dailyResponse.status === 'fulfilled') {
-        const dailyData = await dailyResponse.value.json();
-        const todayKey = getTodayKey();
+        const dailyData = dailyResponse.value as any;
         let todayTasks = [];
         
         console.log('Daily data from backend:', dailyData);
-        console.log('Today key:', todayKey);
         
-        if (Array.isArray(dailyData)) {
-          // If backend returns an array of {date, tasks}
-          const todayData = dailyData.find((d: any) => d.date === todayKey);
-          todayTasks = Array.isArray(todayData?.tasks) ? todayData.tasks : [];
-        } else if (typeof dailyData === 'object' && dailyData !== null) {
-          // If backend returns an object map
-          todayTasks = Array.isArray(dailyData[todayKey]) ? dailyData[todayKey] : [];
+        // Backend returns { message: string, tasks: array }
+        if (dailyData && dailyData.tasks && Array.isArray(dailyData.tasks)) {
+          // Filter tasks for today
+          const today = new Date().toISOString().split('T')[0];
+          todayTasks = dailyData.tasks.filter((task: any) => {
+            const taskDate = new Date(task.date || task.createdAt).toISOString().split('T')[0];
+            return taskDate === today;
+          });
         }
         
         console.log('Today tasks from backend:', todayTasks);
         setDailyTasks(todayTasks);
+        
+        // Also save to localStorage for offline access
+        const todayKey = getTodayKey();
+        localStorage.setItem(todayKey, JSON.stringify(todayTasks));
       } else {
         console.warn('Daily tasks API failed, using localStorage fallback');
         const todayKey = getTodayKey();
@@ -178,20 +208,9 @@ const Dashboard: React.FC = () => {
         }
       });
     } catch (error) {
-      console.error('Error fetching dashboard data:', error);
-      
-      // Fallback to localStorage with validation
-      const todayKey = getTodayKey();
-      const localDaily = loadFromStorage(todayKey);
-      const localWeekly = loadFromStorage('weeklyTasks');
-      const localLearn = loadFromStorage('learnHistory');
-      
-      setDailyTasks(Array.isArray(localDaily) ? localDaily : []);
-      setWeeklyTasks(Array.isArray(localWeekly) ? localWeekly : []);
-      setLearnHistory(Array.isArray(localLearn) ? localLearn : []);
-      
-      toast.error('❌ Failed to refresh data. Using cached data.', {
-        duration: 4000,
+      console.error('Error syncing dashboard data:', error);
+      toast.error('Failed to sync data. Using local data.', {
+        duration: 3000,
         position: 'bottom-center',
         style: {
           background: '#ef4444',
@@ -221,18 +240,21 @@ const Dashboard: React.FC = () => {
     return () => clearInterval(timer);
   }, []);
 
-  // Fetch data on mount and set up refresh interval
+  // Fetch data on mount and set up event listeners
   useEffect(() => {
-    fetchDashboardData();
+    // Load data from localStorage first (fast and reliable)
+    loadDataFromLocalStorage();
     
-    // Refresh data every 10 seconds for better responsiveness
-    const refreshInterval = setInterval(fetchDashboardData, 10000);
+    // Then try to sync with backend in background (only if authenticated)
+    if (!authLoading) {
+      fetchDashboardData();
+    }
     
     // Listen for storage changes to update dashboard in real-time
     const handleStorageChange = (e: StorageEvent) => {
       if (e.key && (e.key.includes('dailyTasks') || e.key === 'weeklyTasks' || e.key === 'learnHistory')) {
         console.log('Storage changed, refreshing dashboard:', e.key);
-        fetchDashboardData();
+        loadDataFromLocalStorage();
       }
     };
     
@@ -241,20 +263,19 @@ const Dashboard: React.FC = () => {
     // Also listen for custom events from other components
     const handleTaskUpdate = () => {
       console.log('Task update event received, refreshing dashboard');
-      fetchDashboardData();
+      loadDataFromLocalStorage();
     };
     
     window.addEventListener('taskUpdated', handleTaskUpdate);
     
     return () => {
-      clearInterval(refreshInterval);
       window.removeEventListener('storage', handleStorageChange);
       window.removeEventListener('taskUpdated', handleTaskUpdate);
     };
-  }, []);
+  }, [authLoading, user]);
 
   // Calculate progress
-  const dailyDone = dailyTasks.filter((t: any) => t.isCompleted).length;
+  const dailyDone = dailyTasks.filter((t: any) => t.isCompleted || t.completed).length;
   const dailyTotal = dailyTasks.length;
   const dailyPercent = dailyTotal ? Math.round((dailyDone / dailyTotal) * 100) : 0;
 
@@ -264,16 +285,20 @@ const Dashboard: React.FC = () => {
     dailyDone,
     dailyTotal,
     dailyPercent,
-    completedTasks: dailyTasks.filter((t: any) => t.isCompleted)
+    completedTasks: dailyTasks.filter((t: any) => t.isCompleted || t.completed)
   });
 
-  const weeklyDone = weeklyTasks.filter((t: any) => t.isCompleted).length;
+  const weeklyDone = weeklyTasks.filter((t: any) => t.isCompleted || t.completed).length;
   const weeklyTotal = weeklyTasks.length;
   const weeklyPercent = weeklyTotal ? Math.round((weeklyDone / weeklyTotal) * 100) : 0;
 
   const streak = updateStreak(learnHistory);
   const learningRate = learnHistory.length;
-  const latestLearnings = [...learnHistory].sort((a, b) => b.date.localeCompare(a.date)).slice(0, 2);
+  const latestLearnings = [...learnHistory].sort((a, b) => {
+    const dateA = new Date(a.date || a.createdAt || new Date());
+    const dateB = new Date(b.date || b.createdAt || new Date());
+    return dateB.getTime() - dateA.getTime();
+  }).slice(0, 2);
 
   // Progress tracking data
   const progressChartData = useMemo(() => getProgressChartData(), []);
@@ -421,24 +446,51 @@ const Dashboard: React.FC = () => {
 
   return (
     <>
-      {/* Control Bar: Backend Status + Refresh Button */}
-      <div className={styles.dashboardControls}>
-        <div className={styles.backendStatus}>
-          <span className={`${styles.statusDot} ${styles[`status-${backendStatus}`]}`}></span>
-          <span className={styles.statusText}>
-            {backendStatus === 'connected' && '🟢 Backend Connected'}
-            {backendStatus === 'disconnected' && '🔴 Backend Disconnected'}
-            {backendStatus === 'checking' && '🟡 Checking Connection...'}
-          </span>
+              {/* Control Bar: Backend Status + Refresh Button */}
+        <div className={styles.dashboardControls}>
+          <div className={styles.backendStatus}>
+            <span className={`${styles.statusDot} ${styles[`status-${backendStatus}`]}`}></span>
+            <span className={styles.statusText}>
+              {backendStatus === 'connected' && '🟢 Backend Connected'}
+              {backendStatus === 'disconnected' && '🔴 Backend Disconnected'}
+              {backendStatus === 'checking' && '🟡 Checking Connection...'}
+            </span>
+          </div>
+          <div className={styles.controlButtons}>
+            <button
+              onClick={() => {
+                loadDataFromLocalStorage();
+                if (user) {
+                  fetchDashboardData(); // Also sync with backend
+                } else {
+                  toast('Please log in to sync with backend', {
+                    duration: 3000,
+                    position: 'bottom-center',
+                    style: {
+                      background: '#3b82f6',
+                      color: '#fff',
+                      borderRadius: '10px',
+                      fontSize: '14px',
+                      fontWeight: '600'
+                    }
+                  });
+                }
+              }}
+              disabled={loading}
+              className={styles.refreshButton}
+            >
+              {loading ? <span className={styles.refreshSpinner}></span> : '🔄'} Refresh Data
+            </button>
+            {!user && (
+              <button
+                onClick={() => navigate('/auth')}
+                className={styles.loginButton}
+              >
+                🔐 Login to Sync
+              </button>
+            )}
+          </div>
         </div>
-        <button
-          onClick={fetchDashboardData}
-          disabled={loading}
-          className={styles.refreshButton}
-        >
-          {loading ? <span className={styles.refreshSpinner}></span> : '🔄'} Refresh Data
-        </button>
-      </div>
       {/* Main Dashboard Container */}
       <motion.div
         initial={{ opacity: 0 }}
@@ -870,7 +922,7 @@ const Dashboard: React.FC = () => {
           <div className={styles.learningsGrid}>
             {latestLearnings.map((learning: any, index: number) => (
               <motion.div
-                key={learning.id}
+                key={learning.id || `learning-${index}`}
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.5 + index * 0.1 }}
@@ -878,17 +930,17 @@ const Dashboard: React.FC = () => {
                 whileHover={{ scale: 1.05, y: -5 }}
               >
                 <div className={styles.learningCardHeader}>
-                  <span className={`${styles.learningCategory} ${styles[learning.category.toLowerCase()]}`}>
-                    {learning.category}
+                  <span className={`${styles.learningCategory} ${styles[(learning.category || 'Tech').toLowerCase()]}`}>
+                    {learning.category || 'Tech'}
                   </span>
                   <span className={styles.learningDate}>
-                    {new Date(learning.date).toLocaleDateString('en-US', { 
+                    {new Date(learning.date || new Date()).toLocaleDateString('en-US', { 
                       month: 'short', 
                       day: 'numeric' 
                     })}
                   </span>
                 </div>
-                <h3 className={styles.learningTitle}>{learning.title}</h3>
+                <h3 className={styles.learningTitle}>{learning.title || 'Untitled'}</h3>
                 {learning.description && (
                   <p className={styles.learningDescription}>{learning.description}</p>
                 )}
@@ -1045,8 +1097,8 @@ const Dashboard: React.FC = () => {
               <div className={styles.learningItems}>
                 {latestLearnings.map((l: any, i: number) => (
                   <div key={i} className={styles.learningItem}>
-                    <span className={styles.learningCategory}>{l.category}</span>
-                    <span className={styles.learningTitle}>{l.title}</span>
+                    <span className={styles.learningCategory}>{l.category || 'Tech'}</span>
+                    <span className={styles.learningTitle}>{l.title || 'Untitled'}</span>
                   </div>
                 ))}
                 {latestLearnings.length === 0 && (
@@ -1235,7 +1287,12 @@ const Dashboard: React.FC = () => {
           transition={{ delay: 0.8 }}
           className={styles.dataManagement}
         >
-          <DataManager onDataRefresh={fetchDashboardData} />
+          <DataManager onDataRefresh={() => {
+            loadDataFromLocalStorage();
+            if (user) {
+              fetchDashboardData(); // Also sync with backend
+            }
+          }} />
         </motion.div>
       </motion.div>
     </>

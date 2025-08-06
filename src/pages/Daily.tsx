@@ -6,6 +6,7 @@ import { Chart, ArcElement, Tooltip, Legend } from 'chart.js';
 import { PlusIcon, TrashIcon, PencilIcon, ArrowDownTrayIcon } from '@heroicons/react/24/solid';
 import { toast } from 'react-hot-toast';
 import './Daily.css';
+import { dailyTasksAPI } from '../services/apiService';
 
 Chart.register(ArcElement, Tooltip, Legend);
 
@@ -20,16 +21,13 @@ const modalAnim = {
   exit: { opacity: 0, scale: 0.9, transition: { duration: 0.2 } },
 };
 
-import { API_ENDPOINTS } from '../utils/config';
-
-const API_URL = API_ENDPOINTS.dailyTasks;
-
 interface DailyTask {
   id: string;
   title: string;
   description?: string;
   isCompleted: boolean;
   createdAt: string;
+  _id?: string; // Added for backend ID
 }
 
 function getTodayKey(): string {
@@ -74,71 +72,88 @@ function Daily() {
   const [saving, setSaving] = useState(false);
   const [showSavedBadge, setShowSavedBadge] = useState(false);
 
-  // Load tasks for today
-  useEffect(() => {
-    setTasks(loadDailyTasks());
-  }, []);
-
-  // Save daily tasks to backend
-  const saveToBackend = async () => {
-    if (tasks.length === 0) {
-      toast.error('📝 No tasks to save. Add some daily tasks first!', {
-        duration: 3000,
-        position: 'bottom-center',
-        style: {
-          background: '#f59e0b',
-          color: 'white',
-          fontWeight: 'bold'
-        }
-      });
-      return;
-    }
-    
-    setSaving(true);
+  // Load tasks for today from backend
+  const loadTasksFromBackend = async () => {
     try {
-      const response = await fetch(API_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          date: getTodayKey(),
-          tasks: tasks
-        }),
-      });
+      const today = new Date().toISOString().split('T')[0];
+      const data = await dailyTasksAPI.getAll(today) as any;
       
-      if (response.ok) {
-        toast.success('✅ Daily tasks saved successfully to backend!', {
-          duration: 3000,
-          position: 'bottom-center',
-          style: {
-            background: '#10b981',
-            color: 'white',
-            fontWeight: 'bold'
-          }
-        });
-        setShowSavedBadge(true);
-        setTimeout(() => setShowSavedBadge(false), 2000);
-      } else {
-        toast.error('❌ Failed to save daily tasks. Server error.', {
-          duration: 4000,
-          position: 'bottom-center',
-          style: {
-            background: '#ef4444',
-            color: 'white',
-            fontWeight: 'bold'
-          }
+      // Backend returns { message: string, tasks: array }
+      let todayTasks = [];
+      if (data && data.tasks && Array.isArray(data.tasks)) {
+        // Filter tasks for today
+        todayTasks = data.tasks.filter((task: any) => {
+          const taskDate = new Date(task.date).toISOString().split('T')[0];
+          return taskDate === today;
         });
       }
+      
+      setTasks(todayTasks);
+      console.log('Loaded tasks from backend:', todayTasks);
     } catch (error) {
-      toast.error('🔌 Connection error! Please check if backend server is running.', {
-        duration: 5000,
-        position: 'bottom-center',
-        style: {
-          background: '#f59e0b',
-          color: 'white',
-          fontWeight: 'bold'
+      // Fallback to localStorage if backend fails
+      console.warn('Backend failed, using localStorage:', error);
+      setTasks(loadDailyTasks());
+    }
+  };
+
+  // Load tasks for today
+  useEffect(() => {
+    loadTasksFromBackend();
+  }, []);
+
+  // Save individual task to backend
+  const saveTaskToBackend = async (task: DailyTask) => {
+    try {
+      const today = new Date().toISOString().split('T')[0];
+      
+      // Only create if task doesn't have a backend ID
+      if (!task._id) {
+        const createdTask = await dailyTasksAPI.create({
+          title: task.title,
+          description: task.description,
+          date: today,
+          priority: 'medium',
+          category: 'general'
+        }) as any;
+        
+        // Update the task with backend ID
+        task._id = createdTask.task._id;
+        task.id = createdTask.task._id;
+      }
+      
+      console.log('Saved task to backend:', task);
+    } catch (error) {
+      console.error('Failed to save to backend:', error);
+      // Continue with localStorage save
+    }
+  };
+
+  // Save all tasks to backend
+  const saveAllTasksToBackend = async () => {
+    try {
+      setSaving(true);
+      const today = new Date().toISOString().split('T')[0];
+      
+      // Save each task to backend
+      for (const task of tasks) {
+        if (!task._id) {
+          await dailyTasksAPI.create({
+            title: task.title,
+            description: task.description,
+            date: today,
+            priority: 'medium',
+            category: 'general'
+          });
         }
-      });
-      console.error('Save error:', error);
+      }
+      
+      console.log('Saved all tasks to backend');
+      setShowSavedBadge(true);
+      setTimeout(() => setShowSavedBadge(false), 2000);
+    } catch (error) {
+      console.error('Failed to save to backend:', error);
+      toast.error('Failed to save to backend');
     } finally {
       setSaving(false);
     }
@@ -198,63 +213,167 @@ function Daily() {
   };
 
   // Add/Edit Task
-  const handleSaveTask = (e: React.FormEvent) => {
+  const handleSaveTask = async (e: React.FormEvent) => {
     e.preventDefault();
+    
     if (!title.trim()) {
-      setFormError('Task title is required');
+      setFormError('Title is required');
       return;
     }
-    setFormError('');
 
-    if (modalMode === 'add') {
-      const newTask: DailyTask = {
-        id: uuidv4(),
-        title: title.trim(),
-        description: desc.trim(),
-        isCompleted: false,
-        createdAt: new Date().toISOString(),
-      };
-      const updated = [newTask, ...tasks];
-      setTasks(updated);
-      saveDailyTasks(updated);
-      toast.success('Task added successfully!');
-      
-      // Notify dashboard of task update
-      window.dispatchEvent(new CustomEvent('taskUpdated'));
-    } else if (editTask) {
-      const updated = { ...editTask, title: title.trim(), description: desc.trim() };
-      const updatedTasks = tasks.map((t) => (t.id === editTask.id ? updated : t));
-      saveDailyTasks(updatedTasks);
-      setTasks(updatedTasks);
-      toast.success('Task updated successfully!');
-      
-      // Notify dashboard of task update
-      window.dispatchEvent(new CustomEvent('taskUpdated'));
+    setFormError('');
+    setSaving(true);
+
+    try {
+      if (modalMode === 'add') {
+        // Create task in backend first
+        const today = new Date().toISOString().split('T')[0];
+        const createdTask = await dailyTasksAPI.create({
+          title: title.trim(),
+          description: desc.trim() || undefined,
+          date: today,
+          priority: 'medium',
+          category: 'general'
+        }) as any;
+
+        // Create local task with backend ID
+        const newTask: DailyTask = {
+          id: createdTask.task._id,
+          title: createdTask.task.title,
+          description: createdTask.task.description,
+          isCompleted: createdTask.task.completed,
+          createdAt: createdTask.task.createdAt,
+          _id: createdTask.task._id
+        };
+
+        const updated = [...tasks, newTask];
+        setTasks(updated);
+        saveDailyTasks(updated);
+        
+        toast.success('✅ Task added successfully!', {
+          duration: 3000,
+          position: 'bottom-center',
+          style: {
+            background: '#10b981',
+            color: 'white',
+            fontWeight: 'bold'
+          }
+        });
+
+        setTitle('');
+        setDesc('');
+        setShowModal(false);
+      } else if (modalMode === 'edit' && editTask) {
+        // Update task in backend
+        const today = new Date().toISOString().split('T')[0];
+        await dailyTasksAPI.update(editTask._id || editTask.id, {
+          title: title.trim(),
+          description: desc.trim() || undefined,
+          date: today,
+          priority: 'medium',
+          category: 'general'
+        });
+
+        const updated: DailyTask = {
+          ...editTask,
+          title: title.trim(),
+          description: desc.trim() || undefined,
+        };
+
+        const updatedTasks = tasks.map(task => 
+          task.id === editTask.id ? updated : task
+        );
+        setTasks(updatedTasks);
+        saveDailyTasks(updatedTasks);
+        
+        toast.success('✅ Task updated successfully!', {
+          duration: 3000,
+          position: 'bottom-center',
+          style: {
+            background: '#10b981',
+            color: 'white',
+            fontWeight: 'bold'
+          }
+        });
+
+        setEditTask(null);
+        setTitle('');
+        setDesc('');
+        setShowModal(false);
+      }
+    } catch (error) {
+      console.error('Task save error:', error);
+      toast.error('❌ Failed to save task', {
+        duration: 3000,
+        position: 'bottom-center',
+        style: {
+          background: '#ef4444',
+          color: 'white',
+          fontWeight: 'bold'
+        }
+      });
+    } finally {
+      setSaving(false);
     }
-    closeModal();
   };
 
   // Toggle complete
-  const handleToggle = (id: string) => {
-    const updatedTasks = tasks.map((t) =>
-      t.id === id ? { ...t, isCompleted: !t.isCompleted } : t
-    );
-    saveDailyTasks(updatedTasks);
-    setTasks(updatedTasks);
-    
-    // Notify dashboard of task update
-    window.dispatchEvent(new CustomEvent('taskUpdated'));
+  const handleToggle = async (id: string) => {
+    try {
+      const task = tasks.find(t => t.id === id);
+      if (!task) return;
+
+      const updatedTasks = tasks.map(task =>
+        task.id === id ? { ...task, isCompleted: !task.isCompleted } : task
+      );
+      setTasks(updatedTasks);
+      saveDailyTasks(updatedTasks);
+
+      // Check if all tasks are completed
+      const allCompleted = updatedTasks.every(task => task.isCompleted);
+      if (allCompleted && updatedTasks.length > 0) {
+        setConfetti(true);
+        setTimeout(() => setConfetti(false), 3000);
+      }
+
+      // Save to backend
+      if (task._id) {
+        await dailyTasksAPI.toggle(task._id);
+      }
+    } catch (error) {
+      console.error('Toggle error:', error);
+      toast.error('Failed to toggle task');
+    }
   };
 
   // Delete
-  const handleDelete = (id: string) => {
-    const updatedTasks = tasks.filter((t) => t.id !== id);
-    saveDailyTasks(updatedTasks);
-    setTasks(updatedTasks);
-    toast.success('Task deleted successfully!');
-    
-    // Notify dashboard of task update
-    window.dispatchEvent(new CustomEvent('taskUpdated'));
+  const handleDelete = async (id: string) => {
+    try {
+      const task = tasks.find(t => t.id === id);
+      if (!task) return;
+
+      const updatedTasks = tasks.filter(task => task.id !== id);
+      setTasks(updatedTasks);
+      saveDailyTasks(updatedTasks);
+
+      // Delete from backend
+      if (task._id) {
+        await dailyTasksAPI.delete(task._id);
+      }
+      
+      toast.success('✅ Task deleted successfully!', {
+        duration: 3000,
+        position: 'bottom-center',
+        style: {
+          background: '#10b981',
+          color: 'white',
+          fontWeight: 'bold'
+        }
+      });
+    } catch (error) {
+      console.error('Delete error:', error);
+      toast.error('Failed to delete task');
+    }
   };
 
   return (
@@ -304,7 +423,7 @@ function Daily() {
         <div className="daily-header-controls">
           <button
             className="save-btn"
-            onClick={saveToBackend}
+            onClick={saveAllTasksToBackend}
             disabled={saving}
           >
             {saving ? 'Saving...' : 'Save Daily Tasks'}

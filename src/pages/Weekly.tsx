@@ -12,6 +12,7 @@ import { Chart, ArcElement, BarElement, CategoryScale, LinearScale, Tooltip, Leg
 import { PlusIcon, TrashIcon, PencilIcon } from '@heroicons/react/24/solid';
 import { toast } from 'react-hot-toast';
 import './Weekly.css';
+import { weeklyTasksAPI } from '../services/apiService';
 
 Chart.register(ArcElement, BarElement, CategoryScale, LinearScale, Tooltip, Legend);
 
@@ -25,10 +26,6 @@ const modalAnim = {
   visible: { opacity: 1, scale: 1, transition: { duration: 0.25 } },
   exit: { opacity: 0, scale: 0.9, transition: { duration: 0.2 } },
 };
-
-import { API_ENDPOINTS } from '../utils/config';
-
-const API_URL = API_ENDPOINTS.weeklyTasks;
 
 function Weekly() {
   // State
@@ -48,9 +45,8 @@ function Weekly() {
   // Load tasks from backend on mount
   useEffect(() => {
     setLoading(true);
-    fetch(API_URL)
-      .then(res => res.json())
-      .then(data => setTasks(data))
+    weeklyTasksAPI.getAll()
+      .then((data: any) => setTasks(Array.isArray(data) ? data : []))
       .catch(() => toast.error('Failed to load weekly tasks'))
       .finally(() => setLoading(false));
   }, []);
@@ -59,41 +55,36 @@ function Weekly() {
   const saveWeeklyTasks = async (tasksToSave: any[]) => {
     setLoading(true);
     try {
-      const response = await fetch(API_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(tasksToSave),
-      });
-      
-      if (response.ok) {
-        toast.success('✅ Weekly tasks saved successfully to backend!', {
-          duration: 3000,
-          position: 'bottom-center',
-          style: {
-            background: '#6366f1',
-            color: 'white',
-            fontWeight: 'bold'
-          }
-        });
-        setShowSavedBadge(true);
-        setTimeout(() => setShowSavedBadge(false), 2000);
-      } else {
-        toast.error('❌ Failed to save weekly tasks. Server error.', {
-          duration: 4000,
-          position: 'bottom-center',
-          style: {
-            background: '#ef4444',
-            color: 'white',
-            fontWeight: 'bold'
-          }
-        });
+      // Create individual tasks in the backend
+      for (const task of tasksToSave) {
+        if (!task._id) { // Only create new tasks that don't have backend ID
+          await weeklyTasksAPI.create({
+            title: task.title,
+            description: task.description || '',
+            priority: task.priority || 'medium',
+            category: task.category || 'general',
+            weekStart: getWeekStartDate()
+          });
+        }
       }
-    } catch (error) {
-      toast.error('🔌 Connection error! Please check if backend server is running.', {
-        duration: 5000,
+      
+      toast.success('✅ Weekly tasks saved successfully to backend!', {
+        duration: 3000,
         position: 'bottom-center',
         style: {
-          background: '#f59e0b',
+          background: '#6366f1',
+          color: 'white',
+          fontWeight: 'bold'
+        }
+      });
+      setShowSavedBadge(true);
+      setTimeout(() => setShowSavedBadge(false), 2000);
+    } catch (error) {
+      toast.error('❌ Failed to save weekly tasks. Server error.', {
+        duration: 4000,
+        position: 'bottom-center',
+        style: {
+          background: '#ef4444',
           color: 'white',
           fontWeight: 'bold'
         }
@@ -163,52 +154,107 @@ function Weekly() {
       return;
     }
     setFormError('');
-    if (modalMode === 'add') {
-      const newTask = {
-        id: uuidv4(),
-        title: title.trim(),
-        description: desc.trim(),
-        isCompleted: false,
-        createdAt: new Date().toISOString(),
-      };
-      const updated = [newTask, ...tasks];
-      setTasks(updated);
-      await saveWeeklyTasks(updated);
-      
-      // Notify dashboard of task update
-      window.dispatchEvent(new CustomEvent('taskUpdated'));
-    } else if (editTask) {
-      const updated = { ...editTask, title: title.trim(), description: desc.trim() };
-      const updatedTasks = tasks.map((t) => (t.id === editTask.id ? updated : t));
-      setTasks(updatedTasks);
-      await saveWeeklyTasks(updatedTasks);
-      
-      // Notify dashboard of task update
-      window.dispatchEvent(new CustomEvent('taskUpdated'));
+    
+    try {
+      if (modalMode === 'add') {
+        // Create task in backend
+        const newTaskData = {
+          title: title.trim(),
+          description: desc.trim(),
+          priority: 'medium' as const,
+          category: 'general'
+          // Remove weekStart as it's calculated on the backend
+        };
+        
+        const createdTask = await weeklyTasksAPI.create(newTaskData) as any;
+        
+        // Add to local state
+        const newTask = {
+          id: createdTask.task._id,
+          title: createdTask.task.title,
+          description: createdTask.task.description,
+          isCompleted: createdTask.task.completed,
+          createdAt: createdTask.task.createdAt,
+          _id: createdTask.task._id // Backend ID
+        };
+        
+        const updated = [newTask, ...tasks];
+        setTasks(updated);
+        
+        // Notify dashboard of task update
+        window.dispatchEvent(new CustomEvent('taskUpdated'));
+      } else if (editTask) {
+        // Update task in backend
+        const updatedTaskData = {
+          title: title.trim(),
+          description: desc.trim(),
+          priority: (editTask.priority || 'medium') as 'low' | 'medium' | 'high',
+          category: editTask.category || 'general'
+        };
+        
+        await weeklyTasksAPI.update(editTask._id || editTask.id, updatedTaskData);
+        
+        // Update local state
+        const updated = { 
+          ...editTask, 
+          title: title.trim(), 
+          description: desc.trim() 
+        };
+        const updatedTasks = tasks.map((t) => (t.id === editTask.id ? updated : t));
+        setTasks(updatedTasks);
+        
+        // Notify dashboard of task update
+        window.dispatchEvent(new CustomEvent('taskUpdated'));
+      }
+      closeModal();
+    } catch (error) {
+      console.error('Task save error:', error);
+      toast.error('Failed to save task. Please try again.');
     }
-    closeModal();
   };
 
   // Toggle complete
   const handleToggle = async (id: string) => {
-    const updatedTasks = tasks.map((t) =>
-      t.id === id ? { ...t, isCompleted: !t.isCompleted } : t
-    );
-    setTasks(updatedTasks);
-    await saveWeeklyTasks(updatedTasks);
-    
-    // Notify dashboard of task update
-    window.dispatchEvent(new CustomEvent('taskUpdated'));
+    try {
+      const task = tasks.find(t => t.id === id);
+      if (!task) return;
+      
+      // Toggle in backend
+      await weeklyTasksAPI.toggle(task._id || task.id);
+      
+      // Update local state
+      const updatedTasks = tasks.map((t) =>
+        t.id === id ? { ...t, isCompleted: !t.isCompleted } : t
+      );
+      setTasks(updatedTasks);
+      
+      // Notify dashboard of task update
+      window.dispatchEvent(new CustomEvent('taskUpdated'));
+    } catch (error) {
+      console.error('Toggle error:', error);
+      toast.error('Failed to toggle task. Please try again.');
+    }
   };
 
   // Delete
   const handleDelete = async (id: string) => {
-    const updatedTasks = tasks.filter((t) => t.id !== id);
-    setTasks(updatedTasks);
-    await saveWeeklyTasks(updatedTasks);
-    
-    // Notify dashboard of task update
-    window.dispatchEvent(new CustomEvent('taskUpdated'));
+    try {
+      const task = tasks.find(t => t.id === id);
+      if (!task) return;
+      
+      // Delete from backend
+      await weeklyTasksAPI.delete(task._id || task.id);
+      
+      // Update local state
+      const updatedTasks = tasks.filter((t) => t.id !== id);
+      setTasks(updatedTasks);
+      
+      // Notify dashboard of task update
+      window.dispatchEvent(new CustomEvent('taskUpdated'));
+    } catch (error) {
+      console.error('Delete error:', error);
+      toast.error('Failed to delete task. Please try again.');
+    }
   };
 
   // Reset week

@@ -6,10 +6,7 @@ import { PencilIcon, TrashIcon, FireIcon, PlusIcon, ChartBarIcon } from '@heroic
 import { toast } from 'react-hot-toast';
 import './Learn.css';
 import BookOpenIcon from '@heroicons/react/24/solid/BookOpenIcon';
-
-import { API_ENDPOINTS } from '../utils/config';
-
-const API_URL = API_ENDPOINTS.learnHistory;
+import { learnTasksAPI } from '../services/apiService';
 
 const CATEGORIES = [
   { label: 'Tech', color: 'bg-blue-500' },
@@ -81,10 +78,26 @@ const Learn: React.FC = () => {
   // Load learnings from backend on mount
   useEffect(() => {
     setLoading(true);
-    fetch(API_URL)
-      .then(res => res.json())
-      .then(data => setLearnings(data))
-      .catch(() => alert('Failed to load learn history'))
+    learnTasksAPI.getAll()
+      .then((data: any) => {
+        // Handle the backend response structure
+        const tasks = data.tasks || data || [];
+        // Convert backend task structure to frontend structure
+        const convertedTasks = tasks.map((task: any) => ({
+          id: task._id || task.id,
+          title: task.title,
+          description: task.description,
+          category: task.subject || 'Tech',
+          source: task.resources?.[0] || '',
+          date: task.createdAt ? new Date(task.createdAt).toISOString().slice(0, 10) : today,
+        }));
+        setLearnings(convertedTasks);
+      })
+      .catch((error) => {
+        console.error('Failed to load learn tasks:', error);
+        // Initialize with empty array if API fails
+        setLearnings([]);
+      })
       .finally(() => setLoading(false));
   }, []);
 
@@ -92,41 +105,38 @@ const Learn: React.FC = () => {
   const saveLearnHistory = async (history: LearningEntry[]) => {
     setLoading(true);
     try {
-      const response = await fetch(API_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(history),
-      });
+      // Convert frontend structure to backend structure
+      const backendTask = {
+        title: history[0].title,
+        description: history[0].description,
+        subject: history[0].category,
+        resources: history[0].source ? [history[0].source] : [],
+        estimatedHours: 1,
+        difficulty: 'medium',
+        completed: false,
+        progress: 0,
+        duration: 1
+      };
+
+      await learnTasksAPI.create(backendTask);
       
-      if (response.ok) {
-        toast.success('✅ Learning history saved successfully to backend!', {
-          duration: 3000,
-          position: 'bottom-center',
-          style: {
-            background: '#a855f7',
-            color: 'white',
-            fontWeight: 'bold'
-          }
-        });
-        setShowSavedBadge(true);
-        setTimeout(() => setShowSavedBadge(false), 2000);
-      } else {
-        toast.error('❌ Failed to save learning history. Server error.', {
-          duration: 4000,
-          position: 'bottom-center',
-          style: {
-            background: '#ef4444',
-            color: 'white',
-            fontWeight: 'bold'
-          }
-        });
-      }
-    } catch (error) {
-      toast.error('🔌 Connection error! Please check if backend server is running.', {
-        duration: 5000,
+      toast.success('✅ Learning task saved successfully!', {
+        duration: 3000,
         position: 'bottom-center',
         style: {
-          background: '#f59e0b',
+          background: '#a855f7',
+          color: 'white',
+          fontWeight: 'bold'
+        }
+      });
+      setShowSavedBadge(true);
+      setTimeout(() => setShowSavedBadge(false), 2000);
+    } catch (error) {
+      toast.error('❌ Failed to save learning task. Server error.', {
+        duration: 4000,
+        position: 'bottom-center',
+        style: {
+          background: '#ef4444',
           color: 'white',
           fontWeight: 'bold'
         }

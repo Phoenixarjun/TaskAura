@@ -2,25 +2,14 @@
   "version": 2,
   "builds": [
     {
-      "src": "backend/vercel-serverless.js",
+      "src": "backend/server.js",
       "use": "@vercel/node"
-    },
-    {
-      "src": "package.json",
-      "use": "@vercel/static-build",
-      "config": {
-        "distDir": "dist"
-      }
     }
   ],
   "routes": [
     {
-      "src": "/api/(.*)",
-      "dest": "/backend/vercel-serverless.js"
-    },
-    {
       "src": "/(.*)",
-      "dest": "/$1"
+      "dest": "backend/server.js"
     }
   ],
   "env": {

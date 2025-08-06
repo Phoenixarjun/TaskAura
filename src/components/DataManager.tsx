@@ -3,7 +3,7 @@ import { exportDataToJSON, importDataFromJSON, clearAllData, getAllData } from '
 import { toast } from 'react-hot-toast';
 import { ArrowDownTrayIcon, ArrowUpTrayIcon, TrashIcon, ChevronDownIcon, ChevronUpIcon } from '@heroicons/react/24/solid';
 import './DataManager.css';
-import { API_ENDPOINTS } from '../utils/config';
+import { weeklyTasksAPI, learnTasksAPI } from '../services/apiService';
 
 interface DataManagerProps {
   onDataRefresh?: () => void;
@@ -26,15 +26,15 @@ const DataManager: React.FC<DataManagerProps> = ({ onDataRefresh }) => {
       // Get localStorage data
       const localData = getAllData();
       
-      // Fetch from backend APIs
+      // Fetch from backend APIs using authenticated service
       const [weeklyResponse, learnResponse] = await Promise.allSettled([
-        fetch(API_ENDPOINTS.weeklyTasks),
-        fetch(API_ENDPOINTS.learnHistory)
+        weeklyTasksAPI.getAll(),
+        learnTasksAPI.getAll()
       ]);
 
       const backendData = {
-        weeklyTasks: weeklyResponse.status === 'fulfilled' ? await weeklyResponse.value.json() : [],
-        learnHistory: learnResponse.status === 'fulfilled' ? await learnResponse.value.json() : []
+        weeklyTasks: weeklyResponse.status === 'fulfilled' ? weeklyResponse.value : [],
+        learnHistory: learnResponse.status === 'fulfilled' ? learnResponse.value : []
       };
 
       setData({

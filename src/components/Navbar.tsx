@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import ThemeToggle from './ThemeToggle';
 import { useTheme } from '../contexts/ThemeContext';
-import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/solid';
+import { useAuth } from '../contexts/AuthContext';
+import { Bars3Icon, XMarkIcon, UserCircleIcon, ArrowRightOnRectangleIcon } from '@heroicons/react/24/solid';
 import styles from './Navbar.module.css';
 
 const navLinks = [
@@ -15,12 +16,23 @@ const navLinks = [
 const Navbar: React.FC = () => {
   const navigate = useNavigate();
   const { colors } = useTheme();
+  const { user, logout } = useAuth();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [showUserMenu, setShowUserMenu] = useState(false);
 
   const handleToggle = () => setMenuOpen((open) => !open);
   const handleNavClick = (path: string) => {
     setMenuOpen(false);
     navigate(path);
+  };
+
+  const handleLogout = () => {
+    logout();
+    navigate('/auth');
+  };
+
+  const toggleUserMenu = () => {
+    setShowUserMenu(!showUserMenu);
   };
 
   return (
@@ -52,15 +64,43 @@ const Navbar: React.FC = () => {
               className={({ isActive }) =>
                 isActive ? `${styles.link} ${styles.active}` : styles.link
               }
-
               onClick={() => handleNavClick(link.path)}
             >
               {link.name}
             </NavLink>
           ))}
         </div>
-        <div className={styles.themeToggle}>
-          <ThemeToggle />
+        <div className={styles.rightSection}>
+          <div className={styles.themeToggle}>
+            <ThemeToggle />
+          </div>
+          {user && (
+            <div className={styles.userSection}>
+              <button
+                onClick={toggleUserMenu}
+                className={styles.userButton}
+                aria-label="User menu"
+              >
+                <UserCircleIcon className={styles.userIcon} />
+                <span className={styles.userName}>{user.name}</span>
+              </button>
+              {showUserMenu && (
+                <div className={styles.userMenu}>
+                  <div className={styles.userInfo}>
+                    <p className={styles.userEmail}>{user.email}</p>
+                    <p className={styles.userName}>{user.name}</p>
+                  </div>
+                  <button
+                    onClick={handleLogout}
+                    className={styles.logoutButton}
+                  >
+                    <ArrowRightOnRectangleIcon className={styles.logoutIcon} />
+                    Logout
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </nav>
     </header>

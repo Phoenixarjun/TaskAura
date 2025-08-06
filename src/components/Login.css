@@ -1,0 +1,423 @@
+/* Login Container */
+.login-container {
+  width: 100%;
+  max-width: 450px;
+  margin: 0 auto;
+  padding: 1rem;
+}
+
+/* Login Card */
+.login-card {
+  background: var(--primary-bg);
+  border-radius: 24px;
+  box-shadow: 
+    0 25px 50px -12px rgba(0, 0, 0, 0.15),
+    0 0 0 1px rgba(255, 255, 255, 0.05);
+  padding: 2.5rem;
+  border: 1px solid var(--primary-border);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  backdrop-filter: blur(10px);
+}
+
+body.dark .login-card {
+  background: var(--secondary-bg);
+  border-color: var(--primary-border);
+  box-shadow: 
+    0 25px 50px -12px rgba(0, 0, 0, 0.4),
+    0 0 0 1px rgba(255, 255, 255, 0.05);
+}
+
+.login-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 
+    0 32px 64px -12px rgba(0, 0, 0, 0.2),
+    0 0 0 1px rgba(255, 255, 255, 0.1);
+}
+
+/* Header Section */
+.login-header {
+  text-align: center;
+  margin-bottom: 2.5rem;
+}
+
+.logo-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(168, 85, 247, 0.1) 100%);
+  border-radius: 16px;
+  border: 1px solid rgba(99, 102, 241, 0.2);
+}
+
+.logo-icon {
+  width: 28px;
+  height: 28px;
+  color: var(--accent-text);
+  filter: drop-shadow(0 2px 4px rgba(99, 102, 241, 0.3));
+}
+
+.logo-text {
+  font-size: 1.5rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, var(--accent-text) 0%, var(--primary-button) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  letter-spacing: -0.025em;
+}
+
+.login-title {
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--primary-text);
+  margin-bottom: 0.75rem;
+  letter-spacing: -0.025em;
+  line-height: 1.2;
+}
+
+.login-subtitle {
+  color: var(--secondary-text);
+  font-size: 1.125rem;
+  line-height: 1.6;
+  max-width: 320px;
+  margin: 0 auto;
+}
+
+/* Form Section */
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.75rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.form-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--primary-text);
+  margin-bottom: 0.25rem;
+}
+
+.label-icon {
+  width: 16px;
+  height: 16px;
+  color: var(--accent-text);
+  opacity: 0.8;
+}
+
+.input-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.form-input {
+  width: 100%;
+  padding: 1rem 1.25rem;
+  border: 2px solid var(--primary-border);
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--primary-text);
+  background: var(--primary-bg);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-sizing: border-box;
+  line-height: 1.5;
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: var(--accent-text);
+  box-shadow: 
+    0 0 0 4px rgba(99, 102, 241, 0.1),
+    0 4px 12px rgba(99, 102, 241, 0.15);
+  transform: translateY(-1px);
+}
+
+.form-input::placeholder {
+  color: var(--secondary-text);
+  opacity: 0.7;
+}
+
+body.dark .form-input {
+  background: var(--secondary-bg);
+  border-color: var(--primary-border);
+  color: var(--primary-text);
+}
+
+.input-error {
+  border-color: #ef4444;
+  background: rgba(239, 68, 68, 0.05);
+  box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.1);
+}
+
+body.dark .input-error {
+  background: rgba(239, 68, 68, 0.1);
+}
+
+.password-toggle {
+  position: absolute;
+  right: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: var(--secondary-text);
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.password-toggle:hover {
+  color: var(--accent-text);
+  background: rgba(99, 102, 241, 0.1);
+  transform: translateY(-50%) scale(1.05);
+}
+
+.toggle-icon {
+  width: 18px;
+  height: 18px;
+}
+
+.error-message {
+  color: #ef4444;
+  font-size: 0.875rem;
+  font-weight: 500;
+  margin-top: 0.25rem;
+  padding-left: 0.25rem;
+  animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Submit Button */
+.submit-button {
+  width: 100%;
+  background: linear-gradient(135deg, var(--accent-text) 0%, var(--primary-button) 100%);
+  color: white;
+  padding: 1rem 1.5rem;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 1.125rem;
+  cursor: pointer;
+  border: none;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 56px;
+  position: relative;
+  overflow: hidden;
+  margin-top: 0.5rem;
+}
+
+.submit-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s;
+}
+
+.submit-button:hover:not(:disabled)::before {
+  left: 100%;
+}
+
+.submit-button:hover:not(:disabled) {
+  background: linear-gradient(135deg, var(--primary-button) 0%, var(--accent-text) 100%);
+  transform: translateY(-2px);
+  box-shadow: 
+    0 12px 32px rgba(99, 102, 241, 0.4),
+    0 4px 12px rgba(99, 102, 241, 0.2);
+}
+
+.submit-button:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.submit-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.loading-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+}
+
+.loading-spinner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top: 2px solid white;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Footer Section */
+.login-footer {
+  margin-top: 2rem;
+  text-align: center;
+}
+
+.divider {
+  position: relative;
+  margin: 1.5rem 0;
+  text-align: center;
+}
+
+.divider::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: var(--primary-border);
+}
+
+.divider-text {
+  background: var(--primary-bg);
+  padding: 0 1rem;
+  color: var(--secondary-text);
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+body.dark .divider-text {
+  background: var(--secondary-bg);
+}
+
+.toggle-text {
+  color: var(--secondary-text);
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+.toggle-link {
+  background: none;
+  border: none;
+  color: var(--accent-text);
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-decoration: none;
+  padding: 0.25rem 0.5rem;
+  border-radius: 6px;
+  margin-left: 0.25rem;
+}
+
+.toggle-link:hover {
+  color: var(--primary-button);
+  background: rgba(99, 102, 241, 0.1);
+  transform: translateY(-1px);
+}
+
+/* Responsive Design */
+@media (max-width: 480px) {
+  .login-container {
+    padding: 0.5rem;
+  }
+  
+  .login-card {
+    padding: 2rem 1.5rem;
+    border-radius: 20px;
+  }
+  
+  .logo-container {
+    padding: 0.75rem;
+    margin-bottom: 1.25rem;
+  }
+  
+  .logo-icon {
+    width: 24px;
+    height: 24px;
+  }
+  
+  .logo-text {
+    font-size: 1.25rem;
+  }
+  
+  .login-title {
+    font-size: 1.75rem;
+  }
+  
+  .login-subtitle {
+    font-size: 1rem;
+  }
+  
+  .form-input {
+    font-size: 16px; /* Prevents zoom on iOS */
+    padding: 0.875rem 1rem;
+  }
+  
+  .submit-button {
+    padding: 0.875rem 1.25rem;
+    font-size: 1rem;
+    min-height: 52px;
+  }
+  
+  .login-form {
+    gap: 1.5rem;
+  }
+}
+
+/* Dark mode specific adjustments */
+body.dark .login-card {
+  background: linear-gradient(135deg, var(--secondary-bg) 0%, rgba(30, 41, 59, 0.8) 100%);
+}
+
+body.dark .form-input:focus {
+  box-shadow: 
+    0 0 0 4px rgba(99, 102, 241, 0.2),
+    0 4px 12px rgba(99, 102, 241, 0.3);
+}
+
+/* Focus styles for accessibility */
+.form-input:focus-visible,
+.password-toggle:focus-visible,
+.submit-button:focus-visible,
+.toggle-link:focus-visible {
+  outline: 2px solid var(--accent-text);
+  outline-offset: 2px;
+}
+
+/* Smooth transitions for all interactive elements */
+* {
+  transition: color 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
+} 
