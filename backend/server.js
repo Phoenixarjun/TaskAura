@@ -33,15 +33,21 @@ app.use(cors({
   credentials: true
 }));
 
-// Rate limiting
+// Rate limiting (relaxed in development and skipped for lightweight endpoints)
 const limiter = rateLimit({
   windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS) || 15 * 60 * 1000,
-  max: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS) || 100,
+  max: process.env.NODE_ENV === 'development'
+    ? 1000
+    : (parseInt(process.env.RATE_LIMIT_MAX_REQUESTS) || 100),
   message: {
     error: 'Too many requests from this IP, please try again later.'
   },
   standardHeaders: true,
   legacyHeaders: false,
+  skip: (req) => process.env.NODE_ENV === 'development' 
+    || req.path === '/health' 
+    || req.path === '/test'
+    || req.path.startsWith('/api/demo')
 });
 
 app.use(limiter);

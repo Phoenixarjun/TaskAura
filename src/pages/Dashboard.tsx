@@ -50,7 +50,7 @@ const Dashboard: React.FC = () => {
   const { user, isLoading: authLoading } = useAuth();
   const [currentTime, setCurrentTime] = useState(new Date());
   const [greeting, setGreeting] = useState('');
-  const [showConfetti, setShowConfetti] = useState(false);
+  // Confetti disabled globally
   
   // State for real-time data
   const [weeklyTasks, setWeeklyTasks] = useState<any[]>([]);
@@ -101,22 +101,68 @@ const Dashboard: React.FC = () => {
       
       // Check if user is authenticated
       if (!user) {
-        console.log('User not authenticated, using localStorage only');
-        loadDataFromLocalStorage();
-        setBackendStatus('disconnected');
+        console.log('User not authenticated, using demo endpoints');
+        setBackendStatus('connected');
         
-        // Show info toast about demo mode
-        toast('Running in demo mode with local data', {
-          duration: 4000,
-          position: 'bottom-center',
-          style: {
-            background: '#f59e0b',
-            color: '#fff',
-            borderRadius: '10px',
-            fontSize: '14px',
-            fontWeight: '600'
+        // Try to fetch demo data from backend
+        try {
+          const [weeklyResponse, learnResponse, dailyResponse] = await Promise.allSettled([
+            weeklyTasksAPI.getAll(),
+            learnTasksAPI.getAll(),
+            dailyTasksAPI.getAll()
+          ]);
+
+          // Handle demo responses
+          if (weeklyResponse.status === 'fulfilled') {
+            const weeklyData = weeklyResponse.value as any;
+            const tasks = weeklyData && weeklyData.tasks && Array.isArray(weeklyData.tasks) ? weeklyData.tasks : [];
+            setWeeklyTasks(tasks);
+            localStorage.setItem('weeklyTasks', JSON.stringify(tasks));
           }
-        });
+
+          if (learnResponse.status === 'fulfilled') {
+            const learnData = learnResponse.value as any;
+            const tasks = learnData && learnData.tasks && Array.isArray(learnData.tasks) ? learnData.tasks : [];
+            setLearnHistory(tasks);
+            localStorage.setItem('learnHistory', JSON.stringify(tasks));
+          }
+
+          if (dailyResponse.status === 'fulfilled') {
+            const dailyData = dailyResponse.value as any;
+            const tasks = dailyData && dailyData.tasks && Array.isArray(dailyData.tasks) ? dailyData.tasks : [];
+            setDailyTasks(tasks);
+            const todayKey = getTodayKey();
+            localStorage.setItem(todayKey, JSON.stringify(tasks));
+          }
+
+          toast('✅ Demo mode: Connected to backend', {
+            duration: 3000,
+            position: 'bottom-center',
+            style: {
+              background: '#10b981',
+              color: '#fff',
+              borderRadius: '10px',
+              fontSize: '14px',
+              fontWeight: '600'
+            }
+          });
+        } catch (error) {
+          console.warn('Demo endpoints failed, using localStorage only');
+          loadDataFromLocalStorage();
+          setBackendStatus('disconnected');
+          
+          toast('Running in offline mode with local data', {
+            duration: 4000,
+            position: 'bottom-center',
+            style: {
+              background: '#f59e0b',
+              color: '#fff',
+              borderRadius: '10px',
+              fontSize: '14px',
+              fontWeight: '600'
+            }
+          });
+        }
         return;
       }
 
@@ -138,26 +184,24 @@ const Dashboard: React.FC = () => {
       // Handle weekly tasks
       if (weeklyResponse.status === 'fulfilled') {
         const weeklyData = weeklyResponse.value as any;
-        // Backend returns { message: string, tasks: array }
-        const tasks = weeklyData && weeklyData.tasks && Array.isArray(weeklyData.tasks) ? weeklyData.tasks : [];
-        setWeeklyTasks(tasks);
-        
-        // Also save to localStorage for offline access
-        localStorage.setItem('weeklyTasks', JSON.stringify(tasks));
+        const tasksRaw = Array.isArray(weeklyData?.tasks) ? weeklyData.tasks : (Array.isArray(weeklyData) ? weeklyData : []);
+        const normalized = tasksRaw.map((t: any) => ({
+          ...t,
+          isCompleted: t?.isCompleted ?? t?.completed ?? false,
+        }));
+        setWeeklyTasks(normalized);
+        localStorage.setItem('weeklyTasks', JSON.stringify(normalized));
       } else {
         console.warn('Weekly tasks API failed, using localStorage fallback');
         const localWeekly = loadFromStorage('weeklyTasks');
-        setWeeklyTasks(Array.isArray(localWeekly) ? localWeekly : []);
+        setWeeklyTasks(Array.isArray(localWeekly) ? localWeekly.map((t: any)=> ({...t, isCompleted: t?.isCompleted ?? t?.completed ?? false})) : []);
       }
 
       // Handle learn history
       if (learnResponse.status === 'fulfilled') {
         const learnData = learnResponse.value as any;
-        // Backend returns array directly for learn tasks
-        const tasks = Array.isArray(learnData) ? learnData : [];
+        const tasks = Array.isArray(learnData) ? learnData : (Array.isArray(learnData?.tasks) ? learnData.tasks : []);
         setLearnHistory(tasks);
-        
-        // Also save to localStorage for offline access
         localStorage.setItem('learnHistory', JSON.stringify(tasks));
       } else {
         console.warn('Learn history API failed, using localStorage fallback');
@@ -168,26 +212,17 @@ const Dashboard: React.FC = () => {
       // Handle daily tasks
       if (dailyResponse.status === 'fulfilled') {
         const dailyData = dailyResponse.value as any;
-        let todayTasks = [];
-        
-        console.log('Daily data from backend:', dailyData);
-        
-        // Backend returns { message: string, tasks: array }
-        if (dailyData && dailyData.tasks && Array.isArray(dailyData.tasks)) {
-          // Filter tasks for today
-          const today = new Date().toISOString().split('T')[0];
-          todayTasks = dailyData.tasks.filter((task: any) => {
-            const taskDate = new Date(task.date || task.createdAt).toISOString().split('T')[0];
-            return taskDate === today;
-          });
-        }
-        
-        console.log('Today tasks from backend:', todayTasks);
-        setDailyTasks(todayTasks);
-        
-        // Also save to localStorage for offline access
-        const todayKey = getTodayKey();
-        localStorage.setItem(todayKey, JSON.stringify(todayTasks));
+        const tasksRaw = Array.isArray(dailyData?.tasks) ? dailyData.tasks : (Array.isArray(dailyData) ? dailyData : []);
+        const today = new Date().toISOString().split('T')[0];
+        const todaysTasks = tasksRaw.filter((task: any) => {
+          const taskDateSrc = task.date || task.createdAt || task.updatedAt;
+          if (!taskDateSrc) return false;
+          const taskDate = new Date(taskDateSrc).toISOString().split('T')[0];
+          return taskDate === today;
+        });
+        setDailyTasks(todaysTasks);
+        const todayKeyLocal = getTodayKey();
+        localStorage.setItem(todayKeyLocal, JSON.stringify(todaysTasks));
       } else {
         console.warn('Daily tasks API failed, using localStorage fallback');
         const todayKey = getTodayKey();
@@ -264,6 +299,9 @@ const Dashboard: React.FC = () => {
     const handleTaskUpdate = () => {
       console.log('Task update event received, refreshing dashboard');
       loadDataFromLocalStorage();
+      if (user) {
+        fetchDashboardData();
+      }
     };
     
     window.addEventListener('taskUpdated', handleTaskUpdate);
@@ -301,8 +339,8 @@ const Dashboard: React.FC = () => {
   }).slice(0, 2);
 
   // Progress tracking data
-  const progressChartData = useMemo(() => getProgressChartData(), []);
-  const progressStats = useMemo(() => getProgressStats(), []);
+  const progressChartData = useMemo(() => getProgressChartData(), [dailyTasks]);
+  const progressStats = useMemo(() => getProgressStats(), [dailyTasks]);
 
   // Weekly Task Progress Chart Data
   const weeklyProgressData = useMemo(() => {
@@ -419,13 +457,7 @@ const Dashboard: React.FC = () => {
     return achievements;
   }, [streak, weeklyPercent, dailyDone, learnHistory.length, progressStats.average, progressStats.streak]);
 
-  // Trigger confetti for achievements
-  useEffect(() => {
-    if (achievements.length > 0 && !showConfetti) {
-      setShowConfetti(true);
-      setTimeout(() => setShowConfetti(false), 3000);
-    }
-  }, [achievements.length, showConfetti]);
+  // Confetti disabled
 
   const formatTime = (date: Date) => {
     return date.toLocaleTimeString('en-US', { 
@@ -451,7 +483,8 @@ const Dashboard: React.FC = () => {
           <div className={styles.backendStatus}>
             <span className={`${styles.statusDot} ${styles[`status-${backendStatus}`]}`}></span>
             <span className={styles.statusText}>
-              {backendStatus === 'connected' && '🟢 Backend Connected'}
+              {backendStatus === 'connected' && user && '🟢 Backend Connected'}
+              {backendStatus === 'connected' && !user && '🟢 Demo Mode'}
               {backendStatus === 'disconnected' && '🔴 Backend Disconnected'}
               {backendStatus === 'checking' && '🟡 Checking Connection...'}
             </span>
@@ -499,19 +532,7 @@ const Dashboard: React.FC = () => {
         transition={{ duration: 0.5 }}
         className={styles.dashboardContainer}
       >
-        {/* Confetti Animation */}
-        <AnimatePresence>
-          {showConfetti && (
-            <motion.div
-              initial={{ opacity: 0, y: -40 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -40 }}
-              className={styles.confetti}
-            >
-              {'🎉✨🎊'.repeat(10)}
-            </motion.div>
-          )}
-        </AnimatePresence>
+        {/* Confetti removed */}
 
         {/* Hero Section */}
         <motion.div

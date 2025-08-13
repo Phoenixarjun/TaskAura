@@ -7,6 +7,7 @@ import { PlusIcon, TrashIcon, PencilIcon, ArrowDownTrayIcon } from '@heroicons/r
 import { toast } from 'react-hot-toast';
 import './Daily.css';
 import { dailyTasksAPI } from '../services/apiService';
+import { saveDailyProgress } from '../utils/dailyProgress';
 
 Chart.register(ArcElement, Tooltip, Legend);
 
@@ -65,7 +66,6 @@ function Daily() {
   const [showModal, setShowModal] = useState(false);
   const [modalMode, setModalMode] = useState<'add' | 'edit'>('add');
   const [editTask, setEditTask] = useState<DailyTask | null>(null);
-  const [confetti, setConfetti] = useState(false);
   const [title, setTitle] = useState('');
   const [desc, setDesc] = useState('');
   const [formError, setFormError] = useState('');
@@ -77,19 +77,23 @@ function Daily() {
     try {
       const today = new Date().toISOString().split('T')[0];
       const data = await dailyTasksAPI.getAll(today) as any;
-      
-      // Backend returns { message: string, tasks: array }
-      let todayTasks = [];
-      if (data && data.tasks && Array.isArray(data.tasks)) {
-        // Filter tasks for today
-        todayTasks = data.tasks.filter((task: any) => {
-          const taskDate = new Date(task.date).toISOString().split('T')[0];
-          return taskDate === today;
-        });
-      }
-      
-      setTasks(todayTasks);
-      console.log('Loaded tasks from backend:', todayTasks);
+      const tasksRaw = Array.isArray(data?.tasks) ? data.tasks : (Array.isArray(data) ? data : []);
+      const todaysTasksRaw = tasksRaw.filter((task: any) => {
+        const src = task.date || task.createdAt || task.updatedAt;
+        if (!src) return false;
+        return new Date(src).toISOString().split('T')[0] === today;
+      });
+      const normalized: DailyTask[] = todaysTasksRaw.map((t: any) => ({
+        id: t._id || t.id,
+        _id: t._id || t.id,
+        title: t.title,
+        description: t.description,
+        isCompleted: t.isCompleted ?? t.completed ?? false,
+        createdAt: t.createdAt || new Date().toISOString(),
+      }));
+      setTasks(normalized);
+      saveDailyTasks(normalized);
+      console.log('Loaded tasks from backend:', normalized);
     } catch (error) {
       // Fallback to localStorage if backend fails
       console.warn('Backend failed, using localStorage:', error);
@@ -99,6 +103,9 @@ function Daily() {
 
   // Load tasks for today
   useEffect(() => {
+    // Fast local load first
+    setTasks(loadDailyTasks());
+    // Then background sync
     loadTasksFromBackend();
   }, []);
 
@@ -164,6 +171,13 @@ function Daily() {
   const total = tasks.length;
   const percent = total ? Math.round((completed / total) * 100) : 0;
 
+  // Persist daily progress for dashboard charts and notify dashboard
+  useEffect(() => {
+    const todayISO = new Date().toISOString().slice(0, 10);
+    saveDailyProgress(todayISO, completed, total);
+    window.dispatchEvent(new CustomEvent('taskUpdated'));
+  }, [completed, total]);
+
   // Chart data
   const chartData = useMemo(() => ({
     labels: ['Completed', 'Remaining'],
@@ -176,12 +190,12 @@ function Daily() {
     ],
   }), [completed, total]);
 
-  // Confetti on full completion
+  // Toast on full completion
   useEffect(() => {
     if (total > 0 && completed === total) {
-      setConfetti(true);
-      toast.success('Amazing! All daily tasks completed! 🎉');
-      setTimeout(() => setConfetti(false), 2000);
+      toast.success('🎉 All daily tasks completed! Great job!', {
+        position: 'top-center',
+      });
     }
   }, [completed, total]);
 
@@ -329,11 +343,12 @@ function Daily() {
       setTasks(updatedTasks);
       saveDailyTasks(updatedTasks);
 
-      // Check if all tasks are completed
+      // Check if all tasks are completed and show toast
       const allCompleted = updatedTasks.every(task => task.isCompleted);
       if (allCompleted && updatedTasks.length > 0) {
-        setConfetti(true);
-        setTimeout(() => setConfetti(false), 3000);
+        toast.success('🎉 All daily tasks completed! Great job!', {
+          position: 'top-center',
+        });
       }
 
       // Save to backend
@@ -383,19 +398,7 @@ function Daily() {
       animate="visible"
       className="daily-container"
     >
-      {/* Confetti */}
-      <AnimatePresence>
-        {confetti && (
-          <motion.div
-            initial={{ opacity: 0, y: -40 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -40 }}
-            className="confetti"
-          >
-            {'🎉✨🎊'.repeat(10)}
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {/* No overlay animation; success is shown via top toast */}
 
       {/* Header */}
       <div className="daily-header">

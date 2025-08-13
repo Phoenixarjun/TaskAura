@@ -34,7 +34,7 @@ function Weekly() {
   const [modalMode, setModalMode] = useState<'add' | 'edit'>('add');
   const [editTask, setEditTask] = useState<any | null>(null);
   const [showReset, setShowReset] = useState(false);
-  const [confetti, setConfetti] = useState(false);
+  // Confetti removed
   const [title, setTitle] = useState('');
   const [desc, setDesc] = useState('');
   // Add error state for title
@@ -46,7 +46,16 @@ function Weekly() {
   useEffect(() => {
     setLoading(true);
     weeklyTasksAPI.getAll()
-      .then((data: any) => setTasks(Array.isArray(data) ? data : []))
+      .then((data: any) => {
+        const serverTasks = Array.isArray(data?.tasks) ? data.tasks : (Array.isArray(data) ? data : []);
+        const normalized = serverTasks.map((t: any) => ({
+          ...t,
+          id: t._id || t.id,
+          _id: t._id || t.id,
+          isCompleted: t?.isCompleted ?? t?.completed ?? false,
+        }));
+        setTasks(normalized);
+      })
       .catch(() => toast.error('Failed to load weekly tasks'))
       .finally(() => setLoading(false));
   }, []);
@@ -62,8 +71,7 @@ function Weekly() {
             title: task.title,
             description: task.description || '',
             priority: task.priority || 'medium',
-            category: task.category || 'general',
-            weekStart: getWeekStartDate()
+            category: task.category || 'general'
           });
         }
       }
@@ -96,9 +104,18 @@ function Weekly() {
   };
 
   // Progress
-  const completed = tasks.filter((t) => t.isCompleted).length;
+  const completed = tasks.filter((t) => t.isCompleted || t.completed).length;
   const total = tasks.length;
   const percent = total ? Math.round((completed / total) * 100) : 0;
+
+  // Toast when all weekly tasks are completed
+  useEffect(() => {
+    if (total > 0 && completed === total) {
+      toast.success('🎉 All weekly tasks completed! Great job!', {
+        position: 'top-center',
+      });
+    }
+  }, [completed, total]);
 
   // Chart data
   const chartData = useMemo(() => ({
@@ -115,14 +132,7 @@ function Weekly() {
   // Week range
   const [weekStart, weekEnd] = getCurrentWeekRange();
 
-  // Confetti on full completion
-  useEffect(() => {
-    if (total > 0 && completed === total) {
-      setConfetti(true);
-      toast.success('Well Done! All tasks completed 🎉');
-      setTimeout(() => setConfetti(false), 2000);
-    }
-  }, [completed, total]);
+  // No confetti on full completion
 
   // Modal open/close helpers
   const openAddModal = () => {
@@ -290,19 +300,7 @@ function Weekly() {
       animate="visible"
       className="weekly-container"
     >
-      {/* Confetti */}
-      <AnimatePresence>
-        {confetti && (
-          <motion.div
-            initial={{ opacity: 0, y: -40 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -40 }}
-            className="confetti"
-          >
-            {'🎉'.repeat(10)}
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {/* Confetti removed */}
       {/* Header */}
       <div className="weekly-header">
         <div>

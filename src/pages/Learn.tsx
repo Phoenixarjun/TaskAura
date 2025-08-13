@@ -64,7 +64,7 @@ const Learn: React.FC = () => {
   const [showModal, setShowModal] = useState(false);
   const [modalMode, setModalMode] = useState<'add' | 'edit'>('add');
   const [editEntry, setEditEntry] = useState<LearningEntry | null>(null);
-  const [showConfetti, setShowConfetti] = useState(false);
+  // Confetti removed
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [showSavedBadge, setShowSavedBadge] = useState(false);
@@ -74,6 +74,21 @@ const Learn: React.FC = () => {
   const learningRate = learnings.length;
   const todayLearnings = learnings.filter(l => l.date === today);
   const pastLearnings = learnings.filter(l => l.date !== today);
+
+  // Motivational toast based on today's activity
+  useEffect(() => {
+    // Only show after initial load
+    if (learnings.length === 0 && todayLearnings.length === 0) return;
+    if (todayLearnings.length === 0) {
+      toast('📚 Keep going! Log one learning today to keep the momentum!', {
+        position: 'top-center',
+      });
+    } else {
+      toast.success('Nice job keeping your learning streak going!', {
+        position: 'top-center',
+      });
+    }
+  }, [todayLearnings.length]);
 
   // Load learnings from backend on mount
   useEffect(() => {
@@ -147,13 +162,7 @@ const Learn: React.FC = () => {
     }
   };
 
-  // Milestone confetti
-  useEffect(() => {
-    if (MILESTONES.includes(streak)) {
-      setShowConfetti(true);
-      setTimeout(() => setShowConfetti(false), 2000);
-    }
-  }, [streak]);
+  // No confetti on milestone
 
   // --- Handlers ---
   const openAddModal = () => {
@@ -275,19 +284,7 @@ const Learn: React.FC = () => {
       exit={{ opacity: 0 }}
       className="learn-container"
     >
-      {/* Confetti */}
-      <AnimatePresence>
-        {showConfetti && (
-          <motion.div
-            initial={{ opacity: 0, y: -40 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -40 }}
-            className="confetti"
-          >
-            {'🔥🎉'.repeat(7)}
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {/* Confetti removed */}
 
       {/* Stats Header */}
       <div

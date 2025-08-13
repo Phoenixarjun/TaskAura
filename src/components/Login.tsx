@@ -20,6 +20,7 @@ const Login: React.FC<LoginProps> = ({ onToggleMode }) => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isLoading, setIsLoading] = useState(false);
+  const [serverError, setServerError] = useState('');
 
   const { login, register } = useAuth();
 
@@ -60,6 +61,7 @@ const Login: React.FC<LoginProps> = ({ onToggleMode }) => {
     if (!validateForm()) return;
 
     setIsLoading(true);
+    setServerError('');
     
     try {
       let success = false;
@@ -72,6 +74,17 @@ const Login: React.FC<LoginProps> = ({ onToggleMode }) => {
       // Form will be reset and user will be redirected by the auth context
     } catch (error) {
       console.error('Authentication error:', error);
+      const msg = (error as any)?.message ? String((error as any).message) : 'Something went wrong. Please try again.';
+      const lower = msg.toLowerCase();
+      if (!isLogin && (lower.includes('already exists') || lower.includes('duplicate'))) {
+        setErrors(prev => ({ ...prev, email: 'Email already registered. Please sign in instead.' }));
+      } else if (isLogin && (lower.includes('invalid') || lower.includes('incorrect'))) {
+        setServerError('Invalid email or password.');
+      } else if (lower.includes('missing') || lower.includes('required')) {
+        setServerError(msg);
+      } else {
+        setServerError(msg);
+      }
     } finally {
       setIsLoading(false);
     }
@@ -83,6 +96,7 @@ const Login: React.FC<LoginProps> = ({ onToggleMode }) => {
     if (errors[field]) {
       setErrors(prev => ({ ...prev, [field]: '' }));
     }
+    if (serverError) setServerError('');
   };
 
   const toggleMode = () => {
@@ -91,6 +105,7 @@ const Login: React.FC<LoginProps> = ({ onToggleMode }) => {
     setErrors({});
     setShowPassword(false);
     setShowConfirmPassword(false);
+    setServerError('');
   };
 
   return (
@@ -134,6 +149,16 @@ const Login: React.FC<LoginProps> = ({ onToggleMode }) => {
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="login-form">
+          {serverError && (
+            <motion.p
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="error-message"
+              role="alert"
+            >
+              {serverError}
+            </motion.p>
+          )}
           {!isLogin && (
             <motion.div
               initial={{ opacity: 0, x: -20 }}

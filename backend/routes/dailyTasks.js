@@ -165,6 +165,7 @@ router.patch('/:id/toggle', auth, async (req, res) => {
     }
 
     task.completed = !task.completed;
+    task.completedAt = task.completed ? new Date() : null;
     await task.save();
 
     res.status(200).json({

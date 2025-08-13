@@ -41,17 +41,33 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   useEffect(() => {
     const checkAuth = async () => {
       try {
+        // Optimistically hydrate user from localStorage to survive refreshes
+        const storedUser = localStorage.getItem('user');
+        if (storedUser) {
+          try {
+            const parsed = JSON.parse(storedUser) as User;
+            setUser(parsed);
+          } catch {}
+        }
+
         const token = localStorage.getItem('token');
         if (token) {
           // Try to get user profile
           const userData = await authAPI.getProfile() as { user: User };
           setUser(userData.user);
+          // Ensure userId is stored for convenience
+          localStorage.setItem('userId', userData.user.userId);
         }
       } catch (error) {
         console.error('Auth check failed:', error);
-        // Clear invalid token
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
+        // Only clear storage on explicit auth errors; keep session for transient errors
+        const message = (error as any)?.message ? String((error as any).message) : '';
+        if (message.toLowerCase().includes('authentication required')) {
+          localStorage.removeItem('token');
+          localStorage.removeItem('user');
+          localStorage.removeItem('userId');
+          setUser(null);
+        }
       } finally {
         setIsLoading(false);
       }
@@ -69,6 +85,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       // Store token and user data
       localStorage.setItem('token', response.token);
       localStorage.setItem('user', JSON.stringify(response.user));
+      localStorage.setItem('userId', response.user.userId);
       
       setUser(response.user);
       toast.success('Login successful!');
@@ -97,6 +114,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       // Store token and user data
       localStorage.setItem('token', response.token);
       localStorage.setItem('user', JSON.stringify(response.user));
+      localStorage.setItem('userId', response.user.userId);
       
       setUser(response.user);
       toast.success('Registration successful! Welcome to TaskAura!');
@@ -120,6 +138,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const logout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
+    localStorage.removeItem('userId');
     setUser(null);
     toast.success('Logged out successfully');
   };
@@ -134,6 +153,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       const updatedUser = { ...user, ...response.user };
       setUser(updatedUser);
       localStorage.setItem('user', JSON.stringify(updatedUser));
+      if (response.user?.userId) {
+        localStorage.setItem('userId', response.user.userId);
+      }
       
       toast.success('Profile updated successfully!');
     } catch (error: any) {

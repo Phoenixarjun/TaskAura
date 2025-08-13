@@ -23,21 +23,34 @@ export function getTodayKey(): string {
 }
 
 // For learn streaks: expects learnHistory as array of { date: string, ... }
-export function updateStreak(learnHistory: { date: string }[]): number {
-  if (!learnHistory.length) return 0;
-  // Sort by date descending
-  const sorted = [...learnHistory].sort((a, b) => b.date.localeCompare(a.date));
+export function updateStreak(
+  learnHistory: { date?: string; createdAt?: string; completedAt?: string }[]
+): number {
+  if (!learnHistory || learnHistory.length === 0) return 0;
+
+  // Normalize to YYYY-MM-DD and deduplicate
+  const dayKeys = new Set<string>();
+  for (const entry of learnHistory) {
+    const raw = entry.date || entry.completedAt || entry.createdAt;
+    if (!raw) continue;
+    const d = new Date(raw);
+    if (isNaN(d.getTime())) continue;
+    const key = d.toISOString().slice(0, 10);
+    dayKeys.add(key);
+  }
+
+  if (dayKeys.size === 0) return 0;
+
+  // Count consecutive days from today backwards
   let streak = 0;
-  let current = new Date();
-  for (let i = 0; i < sorted.length; i++) {
-    const entryDate = new Date(sorted[i].date);
-    if (
-      entryDate.getFullYear() === current.getFullYear() &&
-      entryDate.getMonth() === current.getMonth() &&
-      entryDate.getDate() === current.getDate()
-    ) {
-      streak++;
-      current.setDate(current.getDate() - 1);
+  const cur = new Date();
+  // Normalize today to local date string consistent with keys
+  let cursor = new Date(Date.UTC(cur.getFullYear(), cur.getMonth(), cur.getDate()));
+  while (true) {
+    const key = cursor.toISOString().slice(0, 10);
+    if (dayKeys.has(key)) {
+      streak += 1;
+      cursor.setUTCDate(cursor.getUTCDate() - 1);
     } else {
       break;
     }

@@ -24,7 +24,10 @@ const getAuthHeaders = (endpoint?: string): HeadersInit => {
   return headers;
 };
 
-// Generic API request function
+// Sleep helper
+const sleep = (ms: number) => new Promise((res) => setTimeout(res, ms));
+
+// Generic API request function with simple 429 retry
 const apiRequest = async <T>(
   endpoint: string,
   options: RequestInit = {}
@@ -36,7 +39,16 @@ const apiRequest = async <T>(
   };
 
   try {
-    const response = await fetch(url, config);
+    let attempt = 0;
+    let response: Response | null = null;
+    while (attempt < 3) {
+      response = await fetch(url, config);
+      if (response.status !== 429) break;
+      const backoff = Math.min(2000 * Math.pow(2, attempt), 8000);
+      await sleep(backoff);
+      attempt++;
+    }
+    if (!response) throw new Error('Network error');
     
     if (!response.ok) {
       if (response.status === 401) {
@@ -45,6 +57,18 @@ const apiRequest = async <T>(
         localStorage.removeItem('user');
         window.location.href = '/auth';
         throw new Error('Authentication required');
+      }
+      if (response.status === 429) {
+        // Too many requests: use server message or a friendly fallback
+        try {
+          const errorData = await response.json();
+          const errorMessage = errorData.message || errorData.error;
+          if (errorMessage) throw new Error(errorMessage);
+        } catch (_) {
+          const retryAfter = response.headers.get('Retry-After');
+          const hint = retryAfter ? ` Please retry after ${retryAfter} seconds.` : '';
+          throw new Error(`Too many requests. Please wait a moment and try again.${hint}`);
+        }
       }
       
       // Try to get the error message from the response
@@ -255,10 +279,15 @@ export const demoAPI = {
 // Health check
 export const healthAPI = {
   check: async () => {
-    // Health endpoint is at root level, not under /api
-    const response = await fetch('http://localhost:4000/health');
+    // Debounced health check
+    const response = await fetch('http://localhost:4000/health', { cache: 'no-store' });
     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+      if (response.status === 429) {
+        const retryAfter = response.headers.get('Retry-After');
+        const hint = retryAfter ? ` Please retry after ${retryAfter} seconds.` : '';
+        throw new Error(`Too many requests. Please wait a moment and try again.${hint}`);
+      }
+      throw new Error(`Request failed (${response.status}). Please try again.`);
     }
     return response.json();
   },
