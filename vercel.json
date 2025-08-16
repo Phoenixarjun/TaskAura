@@ -69,15 +69,6 @@
           "value": "Content-Type, Authorization, X-Requested-With"
         }
       ]
-    },
-    {
-      "source": "/(.*\\.(js|css|png|jpg|jpeg|gif|svg|ico|woff|woff2|ttf|eot))$",
-      "headers": [
-        {
-          "key": "cache-control",
-          "value": "max-age=31536000, immutable"
-        }
-      ]
     }
   ]
 }
