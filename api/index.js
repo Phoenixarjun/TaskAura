@@ -36,8 +36,12 @@ app.use(
       "https://taskaura-backend.vercel.app",
       // Allow all Vercel preview deployments
       /^https:\/\/taskaura-.*\.vercel\.app$/,
+      // Allow all naresh-b-as-projects deployments
+      /^https:\/\/taskaura-.*-naresh-b-as-projects\.vercel\.app$/,
     ],
     credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
+    allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
   })
 );
 

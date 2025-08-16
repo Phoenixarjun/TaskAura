@@ -29,13 +29,32 @@ const connectDB = async () => {
 };
 
 module.exports = async (req, res) => {
-  // Set CORS headers
-  res.setHeader("Access-Control-Allow-Origin", "*");
+  // Set CORS headers for all origins
+  const origin = req.headers.origin;
+  const allowedOrigins = [
+    "http://localhost:3000",
+    "http://localhost:5173",
+    "https://taskaura.vercel.app",
+  ];
+
+  if (
+    allowedOrigins.includes(origin) ||
+    /^https:\/\/taskaura-.*\.vercel\.app$/.test(origin)
+  ) {
+    res.setHeader("Access-Control-Allow-Origin", origin);
+  } else {
+    res.setHeader("Access-Control-Allow-Origin", "*");
+  }
+
   res.setHeader(
     "Access-Control-Allow-Methods",
-    "GET, POST, PUT, DELETE, OPTIONS"
+    "GET, POST, PUT, DELETE, OPTIONS, PATCH"
   );
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  res.setHeader(
+    "Access-Control-Allow-Headers",
+    "Content-Type, Authorization, X-Requested-With"
+  );
+  res.setHeader("Access-Control-Allow-Credentials", "true");
 
   if (req.method === "OPTIONS") {
     res.status(200).end();
