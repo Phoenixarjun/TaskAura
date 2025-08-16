@@ -187,17 +187,18 @@ app.get("/", (req, res) => {
       health: "/health",
       test: "/test",
       testCors: "/test-cors",
-      auth: "/auth",
-      dailyTasks: "/daily-tasks",
-      weeklyTasks: "/weekly-tasks",
-      learnTasks: "/learn-tasks",
+      auth: "/auth or /api/auth",
+      dailyTasks: "/daily-tasks or /api/daily-tasks",
+      weeklyTasks: "/weekly-tasks or /api/weekly-tasks",
+      learnTasks: "/learn-tasks or /api/learn-tasks",
     },
   });
 });
 
 // API routes - ensure database connection before handling requests
+// Handle both /auth and /api/auth paths
 app.use(
-  "/auth",
+  ["/auth", "/api/auth"],
   async (req, res, next) => {
     try {
       await connectDB();
@@ -212,7 +213,7 @@ app.use(
 );
 
 app.use(
-  "/daily-tasks",
+  ["/daily-tasks", "/api/daily-tasks"],
   async (req, res, next) => {
     try {
       await connectDB();
@@ -227,7 +228,7 @@ app.use(
 );
 
 app.use(
-  "/weekly-tasks",
+  ["/weekly-tasks", "/api/weekly-tasks"],
   async (req, res, next) => {
     try {
       await connectDB();
@@ -242,7 +243,7 @@ app.use(
 );
 
 app.use(
-  "/learn-tasks",
+  ["/learn-tasks", "/api/learn-tasks"],
   async (req, res, next) => {
     try {
       await connectDB();
@@ -290,12 +291,21 @@ app.use("*", (req, res) => {
       "POST /auth/register",
       "POST /auth/login",
       "GET /auth/profile",
+      "POST /api/auth/register",
+      "POST /api/auth/login",
+      "GET /api/auth/profile",
       "GET /daily-tasks",
       "POST /daily-tasks",
+      "GET /api/daily-tasks",
+      "POST /api/daily-tasks",
       "GET /weekly-tasks",
       "POST /weekly-tasks",
+      "GET /api/weekly-tasks",
+      "POST /api/weekly-tasks",
       "GET /learn-tasks",
       "POST /learn-tasks",
+      "GET /api/learn-tasks",
+      "POST /api/learn-tasks",
     ],
   });
 });
