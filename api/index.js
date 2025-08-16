@@ -54,7 +54,9 @@ app.use(
         return callback(null, true);
       }
 
-      return callback(new Error("Not allowed by CORS"));
+      // Temporarily allow all origins for debugging
+      console.log("Allowing origin for debugging:", origin);
+      return callback(null, true);
     },
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
@@ -173,31 +175,24 @@ app.get("/test", (req, res) => {
 });
 
 // Root endpoint
-app.get("/", async (req, res) => {
-  try {
-    await connectDB();
-    res.status(200).json({
-      message: "TaskAura API Server",
-      version: "1.0.0",
-      status: "running",
-      database:
-        mongoose.connection.readyState === 1 ? "connected" : "disconnected",
-      endpoints: {
-        health: "/health",
-        test: "/test",
-        auth: "/auth",
-        dailyTasks: "/daily-tasks",
-        weeklyTasks: "/weekly-tasks",
-        learnTasks: "/learn-tasks",
-      },
-    });
-  } catch (error) {
-    res.status(500).json({
-      message: "TaskAura API Server",
-      status: "error",
-      error: error.message,
-    });
-  }
+app.get("/", (req, res) => {
+  res.status(200).json({
+    message: "TaskAura API Server",
+    version: "1.0.0",
+    status: "running",
+    environment: process.env.NODE_ENV || "development",
+    hasMongoUri: !!process.env.MONGODB_URI,
+    hasJwtSecret: !!process.env.JWT_SECRET,
+    endpoints: {
+      health: "/health",
+      test: "/test",
+      testCors: "/test-cors",
+      auth: "/auth",
+      dailyTasks: "/daily-tasks",
+      weeklyTasks: "/weekly-tasks",
+      learnTasks: "/learn-tasks",
+    },
+  });
 });
 
 // API routes - ensure database connection before handling requests
