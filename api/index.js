@@ -23,27 +23,75 @@ app.use(
 // CORS configuration - works for both local and production
 app.use(
   cors({
-    origin: [
-      "http://localhost:3000",
-      "http://localhost:3001",
-      "http://localhost:3002",
-      "http://localhost:3003",
-      "http://localhost:3004",
-      "http://localhost:5173",
-      "http://127.0.0.1:3000",
-      "https://taskaura.vercel.app",
-      "https://taskaura-frontend.vercel.app",
-      "https://taskaura-backend.vercel.app",
-      // Allow all Vercel preview deployments
-      /^https:\/\/taskaura-.*\.vercel\.app$/,
-      // Allow all naresh-b-as-projects deployments
-      /^https:\/\/taskaura-.*-naresh-b-as-projects\.vercel\.app$/,
-    ],
+    origin: function (origin, callback) {
+      // Allow requests with no origin (like mobile apps or curl requests)
+      if (!origin) return callback(null, true);
+
+      const allowedOrigins = [
+        "http://localhost:3000",
+        "http://localhost:3001",
+        "http://localhost:3002",
+        "http://localhost:3003",
+        "http://localhost:3004",
+        "http://localhost:5173",
+        "http://127.0.0.1:3000",
+        "https://taskaura.vercel.app",
+        "https://taskaura-frontend.vercel.app",
+        "https://taskaura-backend.vercel.app",
+      ];
+
+      // Check if origin is in allowed list or matches Vercel pattern
+      if (
+        allowedOrigins.includes(origin) ||
+        /^https:\/\/taskaura-.*\.vercel\.app$/.test(origin) ||
+        /^https:\/\/taskaura-.*-naresh-b-as-projects\.vercel\.app$/.test(origin)
+      ) {
+        return callback(null, true);
+      }
+
+      // For development, allow all origins
+      if (process.env.NODE_ENV !== "production") {
+        return callback(null, true);
+      }
+
+      return callback(new Error("Not allowed by CORS"));
+    },
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
     allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
   })
 );
+
+// Handle preflight requests explicitly
+app.options("*", (req, res) => {
+  const origin = req.headers.origin;
+
+  if (
+    origin &&
+    (/^https:\/\/taskaura-.*\.vercel\.app$/.test(origin) ||
+      /^https:\/\/taskaura-.*-naresh-b-as-projects\.vercel\.app$/.test(
+        origin
+      ) ||
+      origin === "https://taskaura.vercel.app" ||
+      origin.includes("localhost"))
+  ) {
+    res.setHeader("Access-Control-Allow-Origin", origin);
+  } else {
+    res.setHeader("Access-Control-Allow-Origin", "*");
+  }
+
+  res.setHeader(
+    "Access-Control-Allow-Methods",
+    "GET, POST, PUT, DELETE, OPTIONS, PATCH"
+  );
+  res.setHeader(
+    "Access-Control-Allow-Headers",
+    "Content-Type, Authorization, X-Requested-With"
+  );
+  res.setHeader("Access-Control-Allow-Credentials", "true");
+  res.setHeader("Access-Control-Max-Age", "86400"); // 24 hours
+  res.status(200).end();
+});
 
 // Rate limiting (relaxed for serverless)
 const limiter = rateLimit({
