@@ -92,10 +92,25 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     } catch (error: any) {
       console.error('Login error:', error);
       const errorMessage = error.message || 'Login failed. Please try again.';
+      const status = error.status;
       
-      // Provide helpful message for invalid credentials
-      if (errorMessage.includes('Invalid credentials') || errorMessage.includes('incorrect')) {
-        toast.error('Invalid email or password. Please check your credentials and try again.');
+      // Provide specific error messages based on status and content
+      if (status === 400) {
+        if (errorMessage.includes('Missing required fields')) {
+          toast.error('Please fill in all required fields.');
+        } else {
+          toast.error(errorMessage);
+        }
+      } else if (status === 401) {
+        if (errorMessage.includes('Invalid credentials') || errorMessage.includes('incorrect')) {
+          toast.error('Invalid email or password. Please check your credentials and try again.');
+        } else {
+          toast.error('Authentication failed. Please check your credentials.');
+        }
+      } else if (status === 404) {
+        toast.error('User not found. Please check your email or register for a new account.');
+      } else if (status === 500) {
+        toast.error('Server error. Please try again later.');
       } else {
         toast.error(errorMessage);
       }
@@ -121,10 +136,27 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     } catch (error: any) {
       console.error('Registration error:', error);
       const errorMessage = error.message || 'Registration failed. Please try again.';
+      const status = error.status;
       
-      // Provide helpful message for existing user
-      if (errorMessage.includes('already exists')) {
-        toast.error('User already exists. Please login instead or use a different email.');
+      // Provide specific error messages based on status and content
+      if (status === 400) {
+        if (errorMessage.includes('already exists') || errorMessage.includes('User already exists')) {
+          toast.error('An account with this email already exists. Please login instead or use a different email.');
+        } else if (errorMessage.includes('Missing required fields')) {
+          toast.error('Please fill in all required fields (name, email, and password).');
+        } else if (errorMessage.includes('Invalid email')) {
+          toast.error('Please enter a valid email address.');
+        } else if (errorMessage.includes('Password')) {
+          toast.error('Password must be at least 6 characters long.');
+        } else {
+          toast.error(errorMessage);
+        }
+      } else if (status === 409) {
+        toast.error('An account with this email already exists. Please login instead.');
+      } else if (status === 422) {
+        toast.error('Invalid input data. Please check your information and try again.');
+      } else if (status === 500) {
+        toast.error('Server error during registration. Please try again later.');
       } else {
         toast.error(errorMessage);
       }
@@ -161,7 +193,23 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     } catch (error: any) {
       console.error('Profile update error:', error);
       const errorMessage = error.message || 'Failed to update profile. Please try again.';
-      toast.error(errorMessage);
+      const status = error.status;
+      
+      if (status === 400) {
+        if (errorMessage.includes('already exists')) {
+          toast.error('This email is already taken. Please use a different email.');
+        } else if (errorMessage.includes('Invalid email')) {
+          toast.error('Please enter a valid email address.');
+        } else {
+          toast.error(errorMessage);
+        }
+      } else if (status === 401) {
+        toast.error('Authentication required. Please login again.');
+      } else if (status === 500) {
+        toast.error('Server error. Please try again later.');
+      } else {
+        toast.error(errorMessage);
+      }
       throw error;
     } finally {
       setIsLoading(false);
@@ -177,7 +225,25 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     } catch (error: any) {
       console.error('Password change error:', error);
       const errorMessage = error.message || 'Failed to change password. Please try again.';
-      toast.error(errorMessage);
+      const status = error.status;
+      
+      if (status === 400) {
+        if (errorMessage.includes('Missing required fields')) {
+          toast.error('Please provide both current and new password.');
+        } else {
+          toast.error(errorMessage);
+        }
+      } else if (status === 401) {
+        if (errorMessage.includes('Invalid current password') || errorMessage.includes('incorrect')) {
+          toast.error('Current password is incorrect. Please try again.');
+        } else {
+          toast.error('Authentication required. Please login again.');
+        }
+      } else if (status === 500) {
+        toast.error('Server error. Please try again later.');
+      } else {
+        toast.error(errorMessage);
+      }
       throw error;
     } finally {
       setIsLoading(false);

@@ -1,6 +1,8 @@
 // API service for TaskAura backend
 
-const API_BASE_URL = 'http://localhost:4000/api';
+const API_BASE_URL = import.meta.env.PROD 
+  ? '/api' 
+  : (import.meta.env.VITE_API_URL ? `${import.meta.env.VITE_API_URL}/api` : 'http://localhost:4000/api');
 
 // Helper function to get auth token
 const getAuthToken = (): string | null => {
@@ -75,9 +77,17 @@ const apiRequest = async <T>(
       try {
         const errorData = await response.json();
         const errorMessage = errorData.message || errorData.error || `HTTP error! status: ${response.status}`;
-        throw new Error(errorMessage);
+        
+        // Create a more detailed error object
+        const error = new Error(errorMessage);
+        (error as any).status = response.status;
+        (error as any).data = errorData;
+        throw error;
       } catch (parseError) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        // If we can't parse the response, create a generic error
+        const error = new Error(`HTTP error! status: ${response.status}`);
+        (error as any).status = response.status;
+        throw error;
       }
     }
 
@@ -280,7 +290,10 @@ export const demoAPI = {
 export const healthAPI = {
   check: async () => {
     // Debounced health check
-    const response = await fetch('http://localhost:4000/health', { cache: 'no-store' });
+    const healthUrl = import.meta.env.PROD 
+      ? '/health' 
+      : (import.meta.env.VITE_API_URL ? `${import.meta.env.VITE_API_URL}/health` : 'http://localhost:4000/health');
+    const response = await fetch(healthUrl, { cache: 'no-store' });
     if (!response.ok) {
       if (response.status === 429) {
         const retryAfter = response.headers.get('Retry-After');

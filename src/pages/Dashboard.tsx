@@ -876,7 +876,7 @@ const Dashboard: React.FC = () => {
             className={styles.analyticsCard}
           >
             <div className={styles.cardHeader}>
-              <FireIcon className={styles.cardIcon} />
+              <FireIcon width={50} className={styles.cardIcon} />
               <span className={styles.cardTitle}>Learning Streak</span>
             </div>
             <div className={styles.chartContainer}>
