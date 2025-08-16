@@ -1,8 +1,7 @@
 // API service for TaskAura backend
+import { API_BASE_URL } from '../utils/config';
 
-const API_BASE_URL = import.meta.env.PROD 
-  ? '/api' 
-  : (import.meta.env.VITE_API_URL ? `${import.meta.env.VITE_API_URL}/api` : 'http://localhost:4000/api');
+const API_URL = `${API_BASE_URL}/api`;
 
 // Helper function to get auth token
 const getAuthToken = (): string | null => {
@@ -34,7 +33,7 @@ const apiRequest = async <T>(
   endpoint: string,
   options: RequestInit = {}
 ): Promise<T> => {
-  const url = `${API_BASE_URL}${endpoint}`;
+  const url = `${API_URL}${endpoint}`;
   const config: RequestInit = {
     ...options,
     headers: getAuthHeaders(endpoint),
@@ -290,9 +289,7 @@ export const demoAPI = {
 export const healthAPI = {
   check: async () => {
     // Debounced health check
-    const healthUrl = import.meta.env.PROD 
-      ? '/health' 
-      : (import.meta.env.VITE_API_URL ? `${import.meta.env.VITE_API_URL}/health` : 'http://localhost:4000/health');
+    const healthUrl = `${API_BASE_URL}/health`;
     const response = await fetch(healthUrl, { cache: 'no-store' });
     if (!response.ok) {
       if (response.status === 429) {

@@ -5,9 +5,15 @@ const getApiBaseUrl = () => {
     return import.meta.env.VITE_API_URL || 'http://localhost:4000';
   }
   
-  // In production, always use the main domain
-  // This ensures all deployments use the same API endpoint
-  return 'https://taskaura.vercel.app';
+  // In production, ALWAYS use the main domain regardless of environment variables
+  // This prevents deployment-specific URLs from being used
+  const PRODUCTION_API_URL = 'https://taskaura.vercel.app';
+  
+  console.log('Production API URL:', PRODUCTION_API_URL);
+  console.log('Environment VITE_API_URL:', import.meta.env.VITE_API_URL);
+  console.log('Using API URL:', PRODUCTION_API_URL);
+  
+  return PRODUCTION_API_URL;
 };
 
 export const API_BASE_URL = getApiBaseUrl();

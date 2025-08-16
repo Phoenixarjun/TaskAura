@@ -1,7 +1,5 @@
 // API service for making authenticated requests
-const API_BASE_URL = import.meta.env.PROD 
-  ? '' 
-  : (import.meta.env.VITE_API_URL || 'http://localhost:4000');
+import { API_BASE_URL } from './config';
 
 interface ApiResponse<T = any> {
   data?: T;
