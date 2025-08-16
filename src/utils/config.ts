@@ -1,7 +1,16 @@
 // API Configuration
-export const API_BASE_URL = import.meta.env.PROD 
-  ? 'https://taskaura.vercel.app'
-  : (import.meta.env.VITE_API_URL || 'http://localhost:4000');
+const getApiBaseUrl = () => {
+  // In development, use local server or VITE_API_URL
+  if (!import.meta.env.PROD) {
+    return import.meta.env.VITE_API_URL || 'http://localhost:4000';
+  }
+  
+  // In production, always use the main domain
+  // This ensures all deployments use the same API endpoint
+  return 'https://taskaura.vercel.app';
+};
+
+export const API_BASE_URL = getApiBaseUrl();
 
 export const API_ENDPOINTS = {
   auth: `${API_BASE_URL}/api/auth`,
