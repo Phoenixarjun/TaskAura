@@ -36,24 +36,18 @@ module.exports = async (req, res) => {
     "http://localhost:5173",
     "https://taskaura.vercel.app",
   ];
-
-  if (
-    allowedOrigins.includes(origin) ||
-    /^https:\/\/taskaura-.*\.vercel\.app$/.test(origin)
-  ) {
+  
+  if (allowedOrigins.includes(origin) || /^https:\/\/taskaura-.*\.vercel\.app$/.test(origin)) {
     res.setHeader("Access-Control-Allow-Origin", origin);
   } else {
     res.setHeader("Access-Control-Allow-Origin", "*");
   }
-
+  
   res.setHeader(
     "Access-Control-Allow-Methods",
     "GET, POST, PUT, DELETE, OPTIONS, PATCH"
   );
-  res.setHeader(
-    "Access-Control-Allow-Headers",
-    "Content-Type, Authorization, X-Requested-With"
-  );
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Requested-With");
   res.setHeader("Access-Control-Allow-Credentials", "true");
 
   if (req.method === "OPTIONS") {
